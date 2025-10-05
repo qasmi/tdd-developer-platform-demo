@@ -4,7 +4,7 @@
   namespace: drupal-app
   repo: https://charts.bitnami.com/bitnami
   chart: drupal
-  version: 21.0.*
+  version: "*"
   valueFiles:
     - drupal-app.yaml
   autoSync:

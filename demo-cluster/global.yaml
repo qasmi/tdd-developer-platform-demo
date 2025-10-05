@@ -4,6 +4,8 @@ environment:
 teams:
   platform:
     clusterAdmin: true
+  dev:
+    clusterAdmin: false
 
 argocd:
   namespace: argocd

@@ -1,0 +1,12 @@
+drupalUsername: admin
+#existingSecret: "drupal-app"
+
+externalDatabase:
+  host: 
+  port: 3306
+  database: bitnami_drupal
+  user: drupal
+#  existingSecret: "drupal-app-externaldb"
+
+mariadb:
+  enabled: false

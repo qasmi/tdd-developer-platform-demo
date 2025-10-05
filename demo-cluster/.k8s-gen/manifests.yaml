@@ -41,6 +41,7 @@ spec:
   sourceRepos:
     - https://github.com/qasmi/tdd-developer-platform-demo.git
     - https://charts.crossplane.io/stable
+    - https://cloudnative-pg.github.io/charts
   clusterResourceWhitelist:
     - group: rbac.authorization.k8s.io
       kind: ClusterRoleBinding

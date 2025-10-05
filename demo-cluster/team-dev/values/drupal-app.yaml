@@ -6,11 +6,11 @@ drupalUsername: admin
 #existingSecret: "drupal-app"
 
 externalDatabase:
-  host: 
+  host: drupal-app-db
   port: 3306
-  database: bitnami_drupal
+  database: drupal
   user: drupal
-#  existingSecret: "drupal-app-externaldb"
+  existingSecret: "drupal-app-externaldb"
 
 mariadb:
   enabled: false

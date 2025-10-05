@@ -19,7 +19,21 @@ spec:
   sourceRepos:
     - https://github.com/qasmi/tdd-developer-platform-demo.git
     - https://charts.crossplane.io/stable
-  clusterResourceWhitelist: []
+  clusterResourceWhitelist:
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+    - group: apiregistration.k8s.io
+      kind: APIService
+    - group: scheduling.k8s.io
+      kind: PriorityClass
 ---
 # Source: gitops-chart/templates/applicationSet.yaml
 apiVersion: argoproj.io/v1alpha1

@@ -1,0 +1,4 @@
+namespaces:
+  crossplane:
+    owner: platform
+    project: platform

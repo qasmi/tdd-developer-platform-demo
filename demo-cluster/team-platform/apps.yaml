@@ -1,0 +1,9 @@
+- name: crossplane
+  owner: platform
+  project: platform
+  namespace: crossplane
+  repo: https://charts.crossplane.io/stable
+  chart: crossplane
+  version: "*"
+  autoSync:
+    enabled: true

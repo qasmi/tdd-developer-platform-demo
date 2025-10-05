@@ -1,3 +1,6 @@
+global:
+  imageRegistry: "bitnamilegacy/drupal"
+
 drupalUsername: admin
 #existingSecret: "drupal-app"
 

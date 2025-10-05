@@ -5,6 +5,7 @@
   repo: https://charts.crossplane.io/stable
   chart: crossplane
   version: "*"
-  valueFiles: []
+  valueFiles:
+    - crossplane.yaml
   autoSync:
     enabled: true

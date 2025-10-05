@@ -1,5 +1,6 @@
-global:
-  imageRegistry: "bitnamilegacy/drupal"
+image:  
+  repository: bitnamilegacy/drupal
+  tag: 11.2.3-debian-12-r2
 
 drupalUsername: admin
 #existingSecret: "drupal-app"

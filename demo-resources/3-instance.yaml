@@ -1,11 +1,9 @@
 apiVersion: example.org/v1alpha1
-kind: Database
+kind: XDatabase
 metadata:
   name: drupal-db
   namespace: drupal-app
 spec:
-  compositionRef:
-    name: mariadbcomposition
   storage: 1Gi
   dbName: drupal
   user: drupal

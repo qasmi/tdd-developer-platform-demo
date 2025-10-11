@@ -58,11 +58,14 @@ spec:
             metadata:
               name: mariadb-secret
               namespace: {{ .observed.resource.metadata.namespace }}
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: mariadb-secret
             stringData:
               root-password: rootpass
               username: {{ .observed.resource.spec.user }}
               password: {{ .observed.resource.spec.password }}
               database: {{ .observed.resource.spec.dbName }}
+
     - step: apply-mariadb
       functionRef:
         name: crossplane-contrib-function-kubernetes-apply
@@ -77,6 +80,8 @@ spec:
               namespace: "{{ .observed.resource.metadata.namespace }}"
               labels:
                 app: mariadb
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: mariadb-statefulset
             spec:
               selector:
                 matchLabels:
@@ -133,6 +138,8 @@ spec:
               namespace: "{{ .observed.resource.metadata.namespace }}"
               labels:
                 app: mariadb
+              annotations:
+                gotemplating.fn.crossplane.io/composition-resource-name: mariadb-service
             spec:
               ports:
                 - port: 3306

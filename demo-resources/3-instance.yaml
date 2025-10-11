@@ -1,5 +1,5 @@
 apiVersion: example.org/v1alpha1
-kind: XDatabase
+kind: Database
 metadata:
   name: drupal-db
   namespace: drupal-app

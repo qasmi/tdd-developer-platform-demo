@@ -1,4 +1,4 @@
-apiVersion: apiextensions.crossplane.io/v2
+apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
   name: xdatabases.example.org
@@ -7,8 +7,16 @@ spec:
   names:
     kind: XDatabase
     plural: xdatabases
+  claimNames:
+    kind: Database
+    plural: databases
   defaultCompositionRef:
     name: mariadbcomposition
+  connectionSecretKeys:
+    - username
+    - password
+    - database
+    - host
   versions:
     - name: v1alpha1
       served: true
@@ -25,13 +33,10 @@ spec:
                   default: "1Gi"
                 dbName:
                   type: string
-                  default: "drupal"
                 user:
                   type: string
-                  default: "drupal"
                 password:
                   type: string
-                  default: "drupalpass"
               required: ["dbName", "user", "password"]
 ---
 apiVersion: apiextensions.crossplane.io/v1
@@ -42,107 +47,98 @@ spec:
   compositeTypeRef:
     apiVersion: example.org/v1alpha1
     kind: XDatabase
-  mode: Pipeline
-  pipeline:
-    - step: render-secret
-      functionRef:
-        name: crossplane-contrib-function-go-templating
-      input:
-        apiVersion: gotemplating.fn.crossplane.io/v1beta1
-        kind: GoTemplate
-        source: Inline
-        inline:
-          template: |
-            apiVersion: v1
-            kind: Secret
-            metadata:
-              name: mariadb-secret
-              namespace: {{ .observed.resource.metadata.namespace }}
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: mariadb-secret
-            stringData:
-              root-password: rootpass
-              username: {{ .observed.resource.spec.user }}
-              password: {{ .observed.resource.spec.password }}
-              database: {{ .observed.resource.spec.dbName }}
+  resources:
+    - name: mariadb-secret
+      base:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: mariadb-secret
+        stringData:
+          root-password: rootpass
+          username: ""
+          password: ""
+          database: ""
+      patches:
+        - fromFieldPath: "spec.user"
+          toFieldPath: "stringData.username"
+        - fromFieldPath: "spec.password"
+          toFieldPath: "stringData.password"
+        - fromFieldPath: "spec.dbName"
+          toFieldPath: "stringData.database"
 
-    - step: apply-mariadb
-      functionRef:
-        name: crossplane-contrib-function-kubernetes-apply
-      input:
-        apiVersion: fn.crossplane.io/v1beta1
-        kind: RunFunctionRequest
-        manifests:
-          - apiVersion: apps/v1
-            kind: StatefulSet
+    - name: mariadb-statefulset
+      base:
+        apiVersion: apps/v1
+        kind: StatefulSet
+        metadata:
+          name: mariadb
+          labels:
+            app: mariadb
+        spec:
+          selector:
+            matchLabels:
+              app: mariadb
+          serviceName: mariadb
+          replicas: 1
+          template:
             metadata:
-              name: "mariadb"
-              namespace: "{{ .observed.resource.metadata.namespace }}"
               labels:
                 app: mariadb
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: mariadb-statefulset
             spec:
-              selector:
-                matchLabels:
-                  app: mariadb
-              serviceName: "mariadb"
-              replicas: 1
-              template:
-                metadata:
-                  labels:
-                    app: mariadb
-                spec:
-                  containers:
-                    - name: mariadb
-                      image: "mariadb:11.3"
-                      ports:
-                        - containerPort: 3306
-                          name: mysql
-                      env:
-                        - name: MYSQL_ROOT_PASSWORD
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: root-password
-                        - name: MYSQL_DATABASE
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: database
-                        - name: MYSQL_USER
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: username
-                        - name: MYSQL_PASSWORD
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: password
-                      volumeMounts:
-                        - name: data
-                          mountPath: /var/lib/mysql
-              volumeClaimTemplates:
-                - metadata:
-                    name: data
-                  spec:
-                    accessModes: ["ReadWriteOnce"]
-                    resources:
-                      requests:
-                        storage: "{{ .observed.resource.spec.storage }}"
-          - apiVersion: v1
-            kind: Service
-            metadata:
-              name: "mariadb"
-              namespace: "{{ .observed.resource.metadata.namespace }}"
-              labels:
-                app: mariadb
-              annotations:
-                gotemplating.fn.crossplane.io/composition-resource-name: mariadb-service
-            spec:
-              ports:
-                - port: 3306
-                  targetPort: mysql
-              selector:
-                app: mariadb
+              containers:
+                - name: mariadb
+                  image: mariadb:11.3
+                  ports:
+                    - containerPort: 3306
+                      name: mysql
+                  env:
+                    - name: MYSQL_ROOT_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: root-password
+                    - name: MYSQL_DATABASE
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: database
+                    - name: MYSQL_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: username
+                    - name: MYSQL_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: password
+                  volumeMounts:
+                    - name: data
+                      mountPath: /var/lib/mysql
+          volumeClaimTemplates:
+            - metadata:
+                name: data
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
+      patches:
+        - fromFieldPath: "spec.storage"
+          toFieldPath: "spec.volumeClaimTemplates[0].spec.resources.requests.storage"
+
+    - name: mariadb-service
+      base:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mariadb
+          labels:
+            app: mariadb
+        spec:
+          ports:
+            - port: 3306
+              targetPort: mysql
+          selector:
+            app: mariadb

@@ -9,13 +9,3 @@
     - crossplane.yaml
   autoSync:
     enabled: true
-- name: cloudnative-pg
-  owner: platform
-  project: platform
-  namespace: crossplane
-  repo: https://cloudnative-pg.github.io/charts
-  chart: cloudnative-pg
-  version: "*"
-  valueFiles: []
-  autoSync:
-    enabled: true

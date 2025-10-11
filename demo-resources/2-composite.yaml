@@ -12,11 +12,6 @@ spec:
     plural: databases
   defaultCompositionRef:
     name: mariadbcomposition
-  connectionSecretKeys:
-    - username
-    - password
-    - database
-    - host
   versions:
     - name: v1alpha1
       served: true
@@ -33,11 +28,16 @@ spec:
                   default: "1Gi"
                 dbName:
                   type: string
+                  default: "drupal"
                 user:
                   type: string
+                  default: "drupal"
                 password:
                   type: string
+                  default: "drupalpass"
               required: ["dbName", "user", "password"]
+            status:
+              type: object
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
@@ -48,31 +48,31 @@ spec:
     apiVersion: example.org/v1alpha1
     kind: XDatabase
   resources:
+    # Secret for database credentials
     - name: mariadb-secret
       base:
         apiVersion: v1
         kind: Secret
         metadata:
           name: mariadb-secret
+          namespace: "{{ .metadata.namespace }}"
         stringData:
           root-password: rootpass
-          username: ""
-          password: ""
-          database: ""
+          username: "{{ .spec.user }}"
+          password: "{{ .spec.password }}"
+          database: "{{ .spec.dbName }}"
       patches:
-        - fromFieldPath: "spec.user"
-          toFieldPath: "stringData.username"
-        - fromFieldPath: "spec.password"
-          toFieldPath: "stringData.password"
-        - fromFieldPath: "spec.dbName"
-          toFieldPath: "stringData.database"
+        - fromFieldPath: "metadata.namespace"
+          toFieldPath: "metadata.namespace"
 
+    # StatefulSet for MariaDB
     - name: mariadb-statefulset
       base:
         apiVersion: apps/v1
         kind: StatefulSet
         metadata:
           name: mariadb
+          namespace: "{{ .metadata.namespace }}"
           labels:
             app: mariadb
         spec:
@@ -123,17 +123,19 @@ spec:
                 accessModes: ["ReadWriteOnce"]
                 resources:
                   requests:
-                    storage: 1Gi
+                    storage: "{{ .spec.storage }}"
       patches:
-        - fromFieldPath: "spec.storage"
-          toFieldPath: "spec.volumeClaimTemplates[0].spec.resources.requests.storage"
+        - fromFieldPath: "metadata.namespace"
+          toFieldPath: "metadata.namespace"
 
+    # Service for MariaDB
     - name: mariadb-service
       base:
         apiVersion: v1
         kind: Service
         metadata:
           name: mariadb
+          namespace: "{{ .metadata.namespace }}"
           labels:
             app: mariadb
         spec:
@@ -142,3 +144,6 @@ spec:
               targetPort: mysql
           selector:
             app: mariadb
+      patches:
+        - fromFieldPath: "metadata.namespace"
+          toFieldPath: "metadata.namespace"

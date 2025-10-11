@@ -1,4 +1,4 @@
-apiVersion: apiextensions.crossplane.io/v2
+apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
   name: xdatabases.example.org
@@ -25,19 +25,13 @@ spec:
               properties:
                 storage:
                   type: string
-                  default: "1Gi"
                 dbName:
                   type: string
-                  default: "drupal"
                 user:
                   type: string
-                  default: "drupal"
                 password:
                   type: string
-                  default: "drupalpass"
               required: ["dbName", "user", "password"]
-            status:
-              type: object
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition

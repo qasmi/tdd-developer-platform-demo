@@ -48,19 +48,21 @@ spec:
       functionRef:
         name: crossplane-contrib-function-go-templating
       input:
-        apiVersion: fn.crossplane.io/v1beta1
-        kind: RunFunctionRequest
-        template: |
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: mariadb-secret
-            namespace: {{ .observed.resource.metadata.namespace }}
-          stringData:
-            root-password: rootpass
-            username: {{ .observed.resource.spec.user }}
-            password: {{ .observed.resource.spec.password }}
-            database: {{ .observed.resource.spec.dbName }}
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            apiVersion: v1
+            kind: Secret
+            metadata:
+              name: mariadb-secret
+              namespace: {{ .observed.resource.metadata.namespace }}
+            stringData:
+              root-password: rootpass
+              username: {{ .observed.resource.spec.user }}
+              password: {{ .observed.resource.spec.password }}
+              database: {{ .observed.resource.spec.dbName }}
     - step: apply-mariadb
       functionRef:
         name: crossplane-contrib-function-kubernetes-apply

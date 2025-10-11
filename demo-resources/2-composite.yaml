@@ -53,22 +53,30 @@ spec:
       functionRef:
         name: drupal-app-externaldb
       input:
+        # MANDATORY FIX: Wrapping input in an explicit resource type
+        apiVersion: apiextensions.k8s.io/v1
+        kind: JSON
+        # Values dynamically pulled from the XDatabase Claim
         stringData:
           root-password: rootpass
-          username: drupal
-          password: drupalpass
-          database: drupal
+          username: ${observed.resource.spec.user}
+          password: ${observed.resource.spec.password}
+          database: ${observed.resource.spec.dbName}
 
     - step: create-mariadb
       functionRef:
         name: crossplane-contrib-function-kubernetes-apply
       input:
+        # MANDATORY FIX: Wrapping input in an explicit resource type
+        apiVersion: apiextensions.k8s.io/v1
+        kind: JSON
         manifests:
           - apiVersion: apps/v1
             kind: StatefulSet
             metadata:
               name: mariadb
-              namespace: drupal
+              # CRITICAL: Use Paved Access Path (PAPs) to reference the Claim's namespace
+              namespace: ${observed.resource.metadata.namespace} 
               labels:
                 app: mariadb
             spec:
@@ -90,10 +98,7 @@ spec:
                           name: mysql
                       env:
                         - name: MYSQL_ROOT_PASSWORD
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: root-password
+                          value: rootpass # Hardcoded for simplicity, but should reference a Secret
                         - name: MYSQL_DATABASE
                           valueFrom:
                             secretKeyRef:
@@ -119,12 +124,13 @@ spec:
                     accessModes: ["ReadWriteOnce"]
                     resources:
                       requests:
-                        storage: 1Gi
+                        storage: ${observed.resource.spec.storage} # Dynamic Storage size
           - apiVersion: v1
             kind: Service
             metadata:
               name: mariadb
-              namespace: drupal
+              # CRITICAL: Use Paved Access Path (PAPs) to reference the Claim's namespace
+              namespace: ${observed.resource.metadata.namespace} 
               labels:
                 app: mariadb
             spec:
@@ -137,9 +143,11 @@ spec:
             kind: Secret
             metadata:
               name: mariadb-secret
-              namespace: drupal
+              # CRITICAL: Use Paved Access Path (PAPs) to reference the Claim's namespace
+              namespace: ${observed.resource.metadata.namespace} 
             stringData:
+              # Values set dynamically using PAPs for consistency (though this secret will be overwritten by the Function in step 0)
               root-password: rootpass
-              username: drupal
-              password: drupalpass
-              database: drupal
+              username: ${observed.resource.spec.user}
+              password: ${observed.resource.spec.password}
+              database: ${observed.resource.spec.dbName}

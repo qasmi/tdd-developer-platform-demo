@@ -1,0 +1,14 @@
+apiVersion: database.example.org/v1alpha1
+kind: MariaDBInstance
+metadata:
+  name: drupal-db
+  namespace: drupal
+spec:
+  parameters:
+    size: medium
+  compositionSelector:
+    matchLabels:
+      provider: kubernetes
+      db: mariadb
+  writeConnectionSecretToRef:
+    name: drupal-app-externaldb

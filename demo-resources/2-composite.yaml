@@ -1,0 +1,79 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xmariadbinstances.database.example.org
+spec:
+  group: database.example.org
+  names:
+    kind: XMariaDBInstance
+    plural: xmariadbinstances
+  claimNames:
+    kind: MariaDBInstance
+    plural: mariadbinstances
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  description: "Parameters for the requested MariaDB instance."
+                  properties:
+                    size:
+                      type: string
+                      description: "The requested size for MariaDB (small, medium, large)."
+                  required:
+                    - size
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: kubernetes-mariadb
+  labels:
+    provider: kubernetes
+    db: mariadb
+spec:
+  compositeTypeRef:
+    apiVersion: database.example.org/v1alpha1
+    kind: XMariaDBInstance
+  resources:
+    - name: mariadb-helm-release
+      base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        spec:
+          forProvider:
+            namespace: default
+            chart:
+              name: mariadb
+              repositoryRef:
+                name: bitnami-charts
+              version: 12.1.2
+            providerConfigRef:
+              name: kubernetes
+            values:
+              auth:
+                rootPassword: "a-secure-root-password"
+                database: "appdb"
+                username: "appuser"
+                password: "apppassword"
+      patches:
+        - fromFieldPath: "spec.parameters.size"
+          toFieldPath: "spec.forProvider.values.resourcesPreset"
+          transforms:
+            - type: Map
+              map:
+                small: "micro"
+                medium: "small"
+                large: "medium"
+        - type: ToCompositeFieldPath
+          fromFieldPath: "status.connectionSecretName"
+          toFieldPath: "status.connectionSecretName"
+          policy:
+            fromFieldPath: Required

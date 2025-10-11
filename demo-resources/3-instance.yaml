@@ -2,7 +2,7 @@ apiVersion: example.org/v1alpha1
 kind: Database
 metadata:
   name: drupal-db
-  namespace: drupal
+  namespace: drupal-app
 spec:
   storage: 1Gi
   dbName: drupal

@@ -1,4 +1,4 @@
-apiVersion: apiextensions.crossplane.io/v1
+apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
   name: xdatabases.example.org
@@ -76,15 +76,15 @@ spec:
           - apiVersion: apps/v1
             kind: StatefulSet
             metadata:
-              name: mariadb
-              namespace: {{ .observed.resource.metadata.namespace }}
+              name: "mariadb"
+              namespace: "{{ .observed.resource.metadata.namespace }}"
               labels:
                 app: mariadb
             spec:
               selector:
                 matchLabels:
                   app: mariadb
-              serviceName: mariadb
+              serviceName: "mariadb"
               replicas: 1
               template:
                 metadata:
@@ -93,7 +93,7 @@ spec:
                 spec:
                   containers:
                     - name: mariadb
-                      image: mariadb:11.3
+                      image: "mariadb:11.3"
                       ports:
                         - containerPort: 3306
                           name: mysql
@@ -128,12 +128,12 @@ spec:
                     accessModes: ["ReadWriteOnce"]
                     resources:
                       requests:
-                        storage: {{ .observed.resource.spec.storage }}
+                        storage: "{{ .observed.resource.spec.storage }}"
           - apiVersion: v1
             kind: Service
             metadata:
-              name: mariadb
-              namespace: {{ .observed.resource.metadata.namespace }}
+              name: "mariadb"
+              namespace: "{{ .observed.resource.metadata.namespace }}"
               labels:
                 app: mariadb
             spec:

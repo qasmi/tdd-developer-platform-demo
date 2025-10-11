@@ -5,4 +5,4 @@ provider:
 
 function:
   packages: 
-    - crossplane-contrib/function-go-templating:latest
+    - "xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.11.0"

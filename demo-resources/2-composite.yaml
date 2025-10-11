@@ -47,103 +47,113 @@ spec:
   compositeTypeRef:
     apiVersion: example.org/v1alpha1
     kind: XDatabase
-  resources:
-    # Secret for database credentials
-    - name: mariadb-secret
-      base:
-        apiVersion: v1
-        kind: Secret
-        metadata:
-          name: mariadb-secret
-          namespace: "{{ .metadata.namespace }}"
-        stringData:
-          root-password: rootpass
-          username: "{{ .spec.user }}"
-          password: "{{ .spec.password }}"
-          database: "{{ .spec.dbName }}"
-      patches:
-        - fromFieldPath: "metadata.namespace"
-          toFieldPath: "metadata.namespace"
-
-    # StatefulSet for MariaDB
-    - name: mariadb-statefulset
-      base:
-        apiVersion: apps/v1
-        kind: StatefulSet
-        metadata:
-          name: mariadb
-          namespace: "{{ .metadata.namespace }}"
-          labels:
-            app: mariadb
-        spec:
-          selector:
-            matchLabels:
-              app: mariadb
-          serviceName: mariadb
-          replicas: 1
-          template:
+  mode: Pipeline
+  pipeline:
+    - step: create-secret
+      functionRef:
+        name: crossplane-contrib-function-go-template # Using Go-Template to render the Secret manifest
+      input:
+        apiVersion: apiextensions.k8s.io/v1
+        kind: JSON
+        template: |
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: mariadb-secret
+            # Dynamic namespace mapping for resource creation:
+            namespace: ${observed.resource.metadata.namespace}
+          stringData:
+            root-password: rootpass
+            username: ${observed.resource.spec.user}
+            password: ${observed.resource.spec.password}
+            database: ${observed.resource.spec.dbName}
+    - step: create-mariadb
+      functionRef:
+        name: crossplane-contrib-function-kubernetes-apply
+      input:
+        apiVersion: apiextensions.k8s.io/v1
+        kind: JSON
+        manifests:
+          - apiVersion: apps/v1
+            kind: StatefulSet
             metadata:
+              name: mariadb
+              namespace: ${observed.resource.metadata.namespace}
               labels:
                 app: mariadb
             spec:
-              containers:
-                - name: mariadb
-                  image: mariadb:11.3
-                  ports:
-                    - containerPort: 3306
-                      name: mysql
-                  env:
-                    - name: MYSQL_ROOT_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                          name: mariadb-secret
-                          key: root-password
-                    - name: MYSQL_DATABASE
-                      valueFrom:
-                        secretKeyRef:
-                          name: mariadb-secret
-                          key: database
-                    - name: MYSQL_USER
-                      valueFrom:
-                        secretKeyRef:
-                          name: mariadb-secret
-                          key: username
-                    - name: MYSQL_PASSWORD
-                      valueFrom:
-                        secretKeyRef:
-                          name: mariadb-secret
-                          key: password
-                  volumeMounts:
-                    - name: data
-                      mountPath: /var/lib/mysql
-          volumeClaimTemplates:
-            - metadata:
-                name: data
-              spec:
-                accessModes: ["ReadWriteOnce"]
-                resources:
-                  requests:
-                    storage: "{{ .spec.storage }}"
-      patches:
-        - fromFieldPath: "metadata.namespace"
-          toFieldPath: "metadata.namespace"
+              selector:
+                matchLabels:
+                  app: mariadb
+              serviceName: mariadb
+              replicas: 1
+              template:
+                metadata:
+                  labels:
+                    app: mariadb
+                spec:
+                  containers:
+                    - name: mariadb
+                      image: mariadb:11.3
+                      ports:
+                        - containerPort: 3306
+                          name: mysql
+                      env:
+                        - name: MYSQL_ROOT_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                              name: mariadb-secret
+                              key: root-password
+                        - name: MYSQL_DATABASE
+                          valueFrom:
+                            secretKeyRef:
+                              name: mariadb-secret
+                              key: database
+                        - name: MYSQL_USER
+                          valueFrom:
+                            secretKeyRef:
+                              name: mariadb-secret
+                              key: username
+                        - name: MYSQL_PASSWORD
+                          valueFrom:
+                            secretKeyRef:
+                              name: mariadb-secret
+                              key: password
+                      volumeMounts:
+                        - name: data
+                          mountPath: /var/lib/mysql
+              volumeClaimTemplates:
+                - metadata:
+                    name: data
+                  spec:
+                    accessModes: ["ReadWriteOnce"]
+                    resources:
+                      requests:
+                        storage: ${observed.resource.spec.storage}
+          - apiVersion: v1
+            kind: Service
+            metadata:
+              name: mariadb
+              namespace: ${observed.resource.metadata.namespace}
+              labels:
+                app: mariadb
+            spec:
+              ports:
+                - port: 3306
+                  targetPort: mysql
+              selector:
+                app: mariadb
 
-    # Service for MariaDB
-    - name: mariadb-service
-      base:
-        apiVersion: v1
-        kind: Service
-        metadata:
-          name: mariadb
-          namespace: "{{ .metadata.namespace }}"
-          labels:
-            app: mariadb
-        spec:
-          ports:
-            - port: 3306
-              targetPort: mysql
-          selector:
-            app: mariadb
-      patches:
-        - fromFieldPath: "metadata.namespace"
-          toFieldPath: "metadata.namespace"
+    - step: set-readiness-and-connection
+      functionRef:
+        name: crossplane-contrib-function-go-template
+      input:
+        apiVersion: apiextensions.k8s.io/v1
+        kind: JSON
+        template: |
+          # The readiness check looks at the StatefulSet created in Step 2.
+          # The XDatabase is Ready IF the StatefulSet has 1 ready replica.
+          {{ .observed.resource.manifests.mariadb.StatefulSet.status.readyReplicas | mustEqual 1 | setReady }}
+
+          # Set the connection secret details (if needed for the XDatabase status)
+          {{ .observed.resource.manifests.mariadb.Service.spec.clusterIP | setConnectionSecretKey "endpoint" }}

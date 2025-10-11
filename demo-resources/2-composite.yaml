@@ -1,15 +1,15 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xmariadbinstances.database.example.org
+  name: xdatabases.example.org
 spec:
-  group: database.example.org
+  group: example.org
   names:
-    kind: XMariaDBInstance
-    plural: xmariadbinstances
+    kind: XDatabase
+    plural: xdatabases
   claimNames:
-    kind: MariaDBInstance
-    plural: mariadbinstances
+    kind: Database
+    plural: databases
   versions:
     - name: v1alpha1
       served: true
@@ -21,59 +21,113 @@ spec:
             spec:
               type: object
               properties:
-                parameters:
-                  type: object
-                  description: "Parameters for the requested MariaDB instance."
-                  properties:
-                    size:
-                      type: string
-                      description: "The requested size for MariaDB (small, medium, large)."
-                  required:
-                    - size
+                storage:
+                  type: string
+                  default: "1Gi"
+                dbName:
+                  type: string
+                  default: "drupal"
+                user:
+                  type: string
+                  default: "drupal"
+                password:
+                  type: string
+                  default: "drupalpass"
+            status:
+              type: object
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: kubernetes-mariadb
-  labels:
-    provider: kubernetes
-    db: mariadb
+  name: mariadbcomposition
 spec:
   compositeTypeRef:
-    apiVersion: database.example.org/v1alpha1
-    kind: XMariaDBInstance
+    apiVersion: example.org/v1alpha1
+    kind: XDatabase
   resources:
-    - name: mariadb-helm-release
+    - name: mariadb
       base:
-        apiVersion: helm.crossplane.io/v1beta1
-        kind: Release
+        apiVersion: apps/v1
+        kind: StatefulSet
+        metadata:
+          name: mariadb
+          namespace: drupal-app
         spec:
-          forProvider:
-            namespace: default
-            chart:
-              name: mariadb
-              repositoryRef:
-                name: bitnami-charts
-              version: 12.1.2
-            providerConfigRef:
-              name: kubernetes
-            values:
-              auth:
-                rootPassword: "a-secure-root-password"
-                database: "appdb"
-                username: "appuser"
-                password: "apppassword"
+          selector:
+            matchLabels:
+              app: mariadb
+          serviceName: mariadb
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                app: mariadb
+            spec:
+              containers:
+                - name: mariadb
+                  image: mariadb:11.3
+                  ports:
+                    - containerPort: 3306
+                      name: mysql
+                  env:
+                    - name: MYSQL_ROOT_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: root-password
+                    - name: MYSQL_DATABASE
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: database
+                    - name: MYSQL_USER
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: username
+                    - name: MYSQL_PASSWORD
+                      valueFrom:
+                        secretKeyRef:
+                          name: mariadb-secret
+                          key: password
+                  volumeMounts:
+                    - name: data
+                      mountPath: /var/lib/mysql
+          volumeClaimTemplates:
+            - metadata:
+                name: data
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                resources:
+                  requests:
+                    storage: 1Gi
       patches:
-        - fromFieldPath: "spec.parameters.size"
-          toFieldPath: "spec.forProvider.values.resourcesPreset"
-          transforms:
-            - type: Map
-              map:
-                small: "micro"
-                medium: "small"
-                large: "medium"
-        - type: ToCompositeFieldPath
-          fromFieldPath: "status.connectionSecretName"
-          toFieldPath: "status.connectionSecretName"
-          policy:
-            fromFieldPath: Required
+        - fromFieldPath: "spec.storage"
+          toFieldPath: "spec.volumeClaimTemplates[0].spec.resources.requests.storage"
+    - name: mariadb-service
+      base:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: mariadb
+          namespace: drupal-app
+        spec:
+          type: ClusterIP
+          ports:
+            - port: 3306
+              targetPort: mysql
+          selector:
+            app: mariadb
+    - name: mariadb-secret
+      base:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: mariadb-secret
+          namespace: drupal-app
+        stringData:
+          root-password: rootpass
+          username: drupal
+          password: drupalpass
+          database: drupal
+  writeConnectionSecretsToNamespace: drupal-app

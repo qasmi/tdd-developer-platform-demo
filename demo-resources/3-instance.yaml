@@ -1,0 +1,10 @@
+apiVersion: example.org/v1alpha1
+kind: Database
+metadata:
+  name: drupal-db
+  namespace: drupal
+spec:
+  storage: 1Gi
+  dbName: drupal
+  user: drupal
+  password: drupalpass

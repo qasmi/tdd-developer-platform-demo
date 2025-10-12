@@ -4,4 +4,4 @@ provider:
   defaultActivations: ["*"]
 
 args:
-  --enable-composition-resources
+  - --enable-composition-resources

@@ -4,7 +4,7 @@
   namespace: crossplane
   repo: https://charts.crossplane.io/stable
   chart: crossplane
-  version: "*"
+  version: "1.21.0-rc.0.163.g160125d58"
   valueFiles:
     - crossplane.yaml
   autoSync:

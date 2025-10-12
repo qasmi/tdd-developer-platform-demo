@@ -10,6 +10,8 @@ spec:
   claimNames:
     kind: Database
     plural: databases
+  defaultCompositionRef:
+    name: mariadbcomposition
   versions:
     - name: v1alpha1
       served: true
@@ -33,6 +35,10 @@ spec:
                 database:
                   type: string
                   default: drupal
+              required:
+                - username
+                - password
+                - database
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition

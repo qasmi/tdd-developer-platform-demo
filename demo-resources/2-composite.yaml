@@ -43,48 +43,86 @@ spec:
     kind: MariaDBInstance
   mode: Pipeline
   pipeline:
-    - step: generate-password
-      functionRef:
-        name: function-random
-      input:
-        apiVersion: fn.crossplane.io/v1beta1
-        kind: Input
-        parameters:
-          key: password
-          length: 16
-
     - step: deploy-mariadb
       functionRef:
-        name: function-apply
+        name: function-patch-and-transform
       input:
-        apiVersion: fn.crossplane.io/v1beta1
-        kind: Input
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
         resources:
-          - apiVersion: helm.crossplane.io/v1beta1
-            kind: Release
-            metadata:
-              name: mariadb-release
-              namespace: database-namespace
-            spec:
-              providerConfigRef:
-                name: example-helm-config
-              forProvider:
-                chart:
-                  name: mariadb
-                  repository: https://charts.bitnami.com/bitnami
-                  version: 12.3.0
-                namespace: mariadb-ns
-                values:
-                  image:
-                    repository: bitnami/mariadb
-                    tag: "10.6.12"
-                  auth:
-                    rootPassword: $(password)
-                    database: exampledb
-                    username: exampleuser
-                  persistence:
-                    enabled: true
-                    size: 8Gi
+          - name: mariadb-release
+            base:
+              apiVersion: helm.crossplane.io/v1beta1
+              kind: Release
+              metadata:
+                name: mariadb-release
+                namespace: crossplane-system
+              spec:
+                providerConfigRef:
+                  name: example-helm-config
+                forProvider:
+                  chart:
+                    name: mariadb
+                    repository: https://charts.bitnami.com/bitnami
+                    version: 12.3.0
+                  namespace: mariadb-ns
+                  values:
+                    image:
+                      repository: bitnami/mariadb
+                      tag: "10.6.12"
+                    auth:
+                      rootPassword: root
+                      database: exampledb
+                      username: exampleuser
+                    persistence:
+                      enabled: true
+                      size: 8Gi
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: mariadbinstance-composition
+spec:
+  compositeTypeRef:
+    apiVersion: database.mycompany.io/v1alpha1
+    kind: MariaDBInstance
+  mode: Pipeline
+  pipeline:
+    - step: deploy-mariadb
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: mariadb-release
+            base:
+              apiVersion: helm.crossplane.io/v1beta1
+              kind: Release
+              metadata:
+                name: mariadb-release
+                namespace: crossplane-system
+              spec:
+                providerConfigRef:
+                  name: example-helm-config
+                forProvider:
+                  chart:
+                    name: mariadb
+                    repository: https://charts.bitnami.com/bitnami
+                    version: 12.3.0
+                  namespace: mariadb-ns
+                  values:
+                    image:
+                      repository: bitnami/mariadb
+                      tag: "10.6.12"
+                    auth:
+                      rootPassword: root
+                      database: exampledb
+                      username: exampleuser
+                    persistence:
+                      enabled: true
+                      size: 8Gi
+
 ---
 apiVersion: database.mycompany.io/v1alpha1
 kind: MariaDBInstance
@@ -95,3 +133,4 @@ spec:
     version: "10.6"
     storageSize: "8Gi"
     user: devuser
+    password: devpass

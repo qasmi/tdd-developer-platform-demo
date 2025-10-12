@@ -10,8 +10,6 @@ spec:
   claimNames:
     kind: Database
     plural: databases
-  defaultCompositionRef:
-    name: mariadb-helm-composition
   versions:
     - name: v1alpha1
       served: true
@@ -23,57 +21,61 @@ spec:
             spec:
               type: object
               properties:
-                parameters:
-                  type: object
-                  properties:
-                    storage:
-                      type: string
-                      default: "1Gi"
-                    username:
-                      type: string
-                    password:
-                      type: string
-                    database:
-                      type: string
+                storage:
+                  type: string
+                  default: 1Gi
+                username:
+                  type: string
+                  default: drupal
+                password:
+                  type: string
+                  default: drupalpass
+                database:
+                  type: string
+                  default: drupal
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: mariadb-helm-composition
+  name: mariadbcomposition
 spec:
   compositeTypeRef:
     apiVersion: example.org/v1alpha1
     kind: Database
-  resources:
-    - name: mariadb
-      base:
-        apiVersion: helm.crossplane.io/v1beta1
-        kind: Release
-        spec:
-          forProvider:
-            chart:
+  mode: Pipeline
+  pipeline:
+    - step: render-mariadb
+      functionRef:
+        name: crossplane-contrib-function-go-templating
+      input:
+        apiVersion: gotemplating.fn.crossplane.io/v1beta1
+        kind: GoTemplate
+        source: Inline
+        inline:
+          template: |
+            apiVersion: helm.crossplane.io/v1beta1
+            kind: Release
+            metadata:
               name: mariadb
-              repository: https://charts.bitnami.com/bitnami
-              version: "12.3.0"
-            namespace: default
-            values:
-              image:
-                repository: bitnamilegacy/external-dns
-              auth:
-                username: user
-                password: pass
-                database: mydb
-              primary:
-                persistence:
-                  size: 1Gi
-      patches:
-        - fromFieldPath: "metadata.namespace"
-          toFieldPath: "spec.forProvider.namespace"
-        - fromFieldPath: "spec.parameters.username"
-          toFieldPath: "spec.forProvider.values.auth.username"
-        - fromFieldPath: "spec.parameters.password"
-          toFieldPath: "spec.forProvider.values.auth.password"
-        - fromFieldPath: "spec.parameters.database"
-          toFieldPath: "spec.forProvider.values.auth.database"
-        - fromFieldPath: "spec.parameters.storage"
-          toFieldPath: "spec.forProvider.values.primary.persistence.size"
+              namespace: {{ .observed.composite.resource.metadata.namespace }}
+            spec:
+              forProvider:
+                chart:
+                  name: mariadb
+                  repository: https://charts.bitnami.com/bitnami
+                  version: "12.3.0"
+                namespace: {{ .observed.composite.resource.metadata.namespace }}
+                values:
+                  image:
+                    repository: bitnamilegacy/external-dns
+                  auth:
+                    rootPassword: rootpass
+                    username: {{ .observed.composite.resource.spec.parameters.username }}
+                    password: {{ .observed.composite.resource.spec.parameters.password }}
+                    database: {{ .observed.composite.resource.spec.parameters.database }}
+                  primary:
+                    persistence:
+                      size: {{ .observed.composite.resource.spec.parameters.storage }}
+    - step: automatically-detect-ready-composed-resources
+      functionRef:
+        name: function-auto-ready

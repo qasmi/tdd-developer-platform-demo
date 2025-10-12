@@ -4,8 +4,7 @@ metadata:
   name: drupal-db
   namespace: drupal-app
 spec:
-  parameters:
-    storage: 1Gi
-    username: drupal
-    password: drupalpass
-    database: drupal
+  storage: 1Gi
+  username: drupal
+  password: drupalpass
+  database: drupal

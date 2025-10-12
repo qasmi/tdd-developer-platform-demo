@@ -44,7 +44,7 @@ spec:
     kind: Database
   mode: Pipeline
   pipeline:
-    - step: render-mariadb
+    - step: render-helmrelease
       functionRef:
         name: crossplane-contrib-function-go-templating
       input:
@@ -66,16 +66,14 @@ spec:
                   version: "12.3.0"
                 namespace: {{ .observed.composite.resource.metadata.namespace }}
                 values:
-                  image:
-                    repository: bitnamilegacy/external-dns
                   auth:
                     rootPassword: rootpass
-                    username: {{ .observed.composite.resource.spec.parameters.username }}
-                    password: {{ .observed.composite.resource.spec.parameters.password }}
-                    database: {{ .observed.composite.resource.spec.parameters.database }}
+                    username: {{ .observed.composite.resource.spec.username }}
+                    password: {{ .observed.composite.resource.spec.password }}
+                    database: {{ .observed.composite.resource.spec.database }}
                   primary:
                     persistence:
-                      size: {{ .observed.composite.resource.spec.parameters.storage }}
+                      size: {{ .observed.composite.resource.spec.storage }}
     - step: automatically-detect-ready-composed-resources
       functionRef:
         name: function-auto-ready

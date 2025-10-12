@@ -1,3 +1,18 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-helm
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/provider-helm:v0.16.0
+---
+apiVersion: helm.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: in-cluster-helm
+spec:
+  credentials:
+    source: None
+---
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
@@ -26,9 +41,11 @@ spec:
                   properties:
                     version:
                       type: string
-                    storageSize:
+                    size:
                       type: string
-                    user:
+                    database:
+                      type: string
+                    username:
                       type: string
                     password:
                       type: string
@@ -41,96 +58,59 @@ spec:
   compositeTypeRef:
     apiVersion: database.mycompany.io/v1alpha1
     kind: MariaDBInstance
-  mode: Pipeline
-  pipeline:
-    - step: deploy-mariadb
-      functionRef:
-        name: function-patch-and-transform
-      input:
-        apiVersion: pt.fn.crossplane.io/v1beta1
-        kind: Resources
-        resources:
-          - name: mariadb-release
-            base:
-              apiVersion: helm.crossplane.io/v1beta1
-              kind: Release
-              metadata:
-                name: mariadb-release
-                namespace: crossplane-system
-              spec:
-                providerConfigRef:
-                  name: example-helm-config
-                forProvider:
-                  chart:
-                    name: mariadb
-                    repository: https://charts.bitnami.com/bitnami
-                    version: 12.3.0
-                  namespace: mariadb-ns
-                  values:
-                    image:
-                      repository: bitnami/mariadb
-                      tag: "10.6.12"
-                    auth:
-                      rootPassword: root
-                      database: exampledb
-                      username: exampleuser
-                    persistence:
-                      enabled: true
-                      size: 8Gi
+  resources:
+    - name: mariadb
+      base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        metadata:
+          name: mariadb
+          namespace: crossplane-system
+        spec:
+          providerConfigRef:
+            name: in-cluster-helm
+          forProvider:
+            namespace: mariadb-ns
+            chart:
+              repository: https://charts.bitnami.com/bitnami
+              name: mariadb
+              version: 12.3.0
+            values:
+              image:
+                repository: bitnami/mariadb
+              primary:
+                persistence:
+                  enabled: true
+                  size: 8Gi
+              auth:
+                rootPassword: root
+                database: exampledb
+                username: user
+                password: pass
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.version
+          toFieldPath: spec.forProvider.values.image.tag
+          policy:
+            fromFieldPath: Optional
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.database
+          toFieldPath: spec.forProvider.values.auth.database
+          policy:
+            fromFieldPath: Optional
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.username
+          toFieldPath: spec.forProvider.values.auth.username
+          policy:
+            fromFieldPath: Optional
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.password
+          toFieldPath: spec.forProvider.values.auth.password
+          policy:
+            fromFieldPath: Optional
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.parameters.size
+          toFieldPath: spec.forProvider.values.primary.persistence.size
+          policy:
+            fromFieldPath: Optional
 ---
-apiVersion: apiextensions.crossplane.io/v1
-kind: Composition
-metadata:
-  name: mariadbinstance-composition
-spec:
-  compositeTypeRef:
-    apiVersion: database.mycompany.io/v1alpha1
-    kind: MariaDBInstance
-  mode: Pipeline
-  pipeline:
-    - step: deploy-mariadb
-      functionRef:
-        name: function-patch-and-transform
-      input:
-        apiVersion: pt.fn.crossplane.io/v1beta1
-        kind: Resources
-        resources:
-          - name: mariadb-release
-            base:
-              apiVersion: helm.crossplane.io/v1beta1
-              kind: Release
-              metadata:
-                name: mariadb-release
-                namespace: crossplane-system
-              spec:
-                providerConfigRef:
-                  name: example-helm-config
-                forProvider:
-                  chart:
-                    name: mariadb
-                    repository: https://charts.bitnami.com/bitnami
-                    version: 12.3.0
-                  namespace: mariadb-ns
-                  values:
-                    image:
-                      repository: bitnami/mariadb
-                      tag: "10.6.12"
-                    auth:
-                      rootPassword: root
-                      database: exampledb
-                      username: exampleuser
-                    persistence:
-                      enabled: true
-                      size: 8Gi
-
----
-apiVersion: database.mycompany.io/v1alpha1
-kind: MariaDBInstance
-metadata:
-  name: dev-mariadb
-spec:
-  parameters:
-    version: "10.6"
-    storageSize: "8Gi"
-    user: devuser
-    password: devpass

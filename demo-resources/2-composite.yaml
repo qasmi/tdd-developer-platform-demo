@@ -1,17 +1,17 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: xdatabases.example.org
+  name: databases.example.org
 spec:
   group: example.org
   names:
-    kind: XDatabase
-    plural: xdatabases
+    kind: Database
+    plural: databases
   claimNames:
     kind: Database
     plural: databases
   defaultCompositionRef:
-    name: mariadbcomposition
+    name: mariadb-helm-composition
   versions:
     - name: v1alpha1
       served: true
@@ -23,137 +23,57 @@ spec:
             spec:
               type: object
               properties:
-                storage:
-                  type: string
-                  default: "1Gi"
-                dbName:
-                  type: string
-                  default: "drupal"
-                user:
-                  type: string
-                  default: "drupal"
-                password:
-                  type: string
-                  default: "drupalpass"
-              required: ["dbName", "user", "password"]
-            status:
-              type: object
+                parameters:
+                  type: object
+                  properties:
+                    storage:
+                      type: string
+                      default: "1Gi"
+                    username:
+                      type: string
+                    password:
+                      type: string
+                    database:
+                      type: string
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: mariadbcomposition
+  name: mariadb-helm-composition
 spec:
   compositeTypeRef:
     apiVersion: example.org/v1alpha1
-    kind: XDatabase
-  mode: Pipeline
-  pipeline:
-    - step: create-secret
-      functionRef:
-        name: crossplane-contrib-function-go-template # Using Go-Template to render the Secret manifest
-      input:
-        apiVersion: apiextensions.k8s.io/v1
-        kind: JSON
-        template: |
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: mariadb-secret
-            # Dynamic namespace mapping for resource creation:
-            namespace: ${observed.resource.metadata.namespace}
-          stringData:
-            root-password: rootpass
-            username: ${observed.resource.spec.user}
-            password: ${observed.resource.spec.password}
-            database: ${observed.resource.spec.dbName}
-    - step: create-mariadb
-      functionRef:
-        name: crossplane-contrib-function-kubernetes-apply
-      input:
-        apiVersion: apiextensions.k8s.io/v1
-        kind: JSON
-        manifests:
-          - apiVersion: apps/v1
-            kind: StatefulSet
-            metadata:
+    kind: Database
+  resources:
+    - name: mariadb
+      base:
+        apiVersion: helm.crossplane.io/v1beta1
+        kind: Release
+        spec:
+          forProvider:
+            chart:
               name: mariadb
-              namespace: ${observed.resource.metadata.namespace}
-              labels:
-                app: mariadb
-            spec:
-              selector:
-                matchLabels:
-                  app: mariadb
-              serviceName: mariadb
-              replicas: 1
-              template:
-                metadata:
-                  labels:
-                    app: mariadb
-                spec:
-                  containers:
-                    - name: mariadb
-                      image: mariadb:11.3
-                      ports:
-                        - containerPort: 3306
-                          name: mysql
-                      env:
-                        - name: MYSQL_ROOT_PASSWORD
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: root-password
-                        - name: MYSQL_DATABASE
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: database
-                        - name: MYSQL_USER
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: username
-                        - name: MYSQL_PASSWORD
-                          valueFrom:
-                            secretKeyRef:
-                              name: mariadb-secret
-                              key: password
-                      volumeMounts:
-                        - name: data
-                          mountPath: /var/lib/mysql
-              volumeClaimTemplates:
-                - metadata:
-                    name: data
-                  spec:
-                    accessModes: ["ReadWriteOnce"]
-                    resources:
-                      requests:
-                        storage: ${observed.resource.spec.storage}
-          - apiVersion: v1
-            kind: Service
-            metadata:
-              name: mariadb
-              namespace: ${observed.resource.metadata.namespace}
-              labels:
-                app: mariadb
-            spec:
-              ports:
-                - port: 3306
-                  targetPort: mysql
-              selector:
-                app: mariadb
-
-    - step: set-readiness-and-connection
-      functionRef:
-        name: crossplane-contrib-function-go-template
-      input:
-        apiVersion: apiextensions.k8s.io/v1
-        kind: JSON
-        template: |
-          # The readiness check looks at the StatefulSet created in Step 2.
-          # The XDatabase is Ready IF the StatefulSet has 1 ready replica.
-          {{ .observed.resource.manifests.mariadb.StatefulSet.status.readyReplicas | mustEqual 1 | setReady }}
-
-          # Set the connection secret details (if needed for the XDatabase status)
-          {{ .observed.resource.manifests.mariadb.Service.spec.clusterIP | setConnectionSecretKey "endpoint" }}
+              repository: https://charts.bitnami.com/bitnami
+              version: "12.3.0"
+            namespace: default
+            values:
+              image:
+                repository: bitnamilegacy/external-dns
+              auth:
+                username: user
+                password: pass
+                database: mydb
+              primary:
+                persistence:
+                  size: 1Gi
+      patches:
+        - fromFieldPath: "metadata.namespace"
+          toFieldPath: "spec.forProvider.namespace"
+        - fromFieldPath: "spec.parameters.username"
+          toFieldPath: "spec.forProvider.values.auth.username"
+        - fromFieldPath: "spec.parameters.password"
+          toFieldPath: "spec.forProvider.values.auth.password"
+        - fromFieldPath: "spec.parameters.database"
+          toFieldPath: "spec.forProvider.values.auth.database"
+        - fromFieldPath: "spec.parameters.storage"
+          toFieldPath: "spec.forProvider.values.primary.persistence.size"

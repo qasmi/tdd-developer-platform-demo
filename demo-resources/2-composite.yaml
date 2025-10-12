@@ -63,7 +63,7 @@ spec:
                 chart:
                   name: mariadb
                   repository: https://charts.bitnami.com/bitnami
-                  version: "12.3.0"
+                  version: "14.1.0"
                 namespace: {{ .observed.composite.resource.metadata.namespace }}
                 values:
                   auth:
@@ -74,6 +74,17 @@ spec:
                   primary:
                     persistence:
                       size: {{ .observed.composite.resource.spec.storage }}
-    - step: automatically-detect-ready-composed-resources
+    - step: set-ready
       functionRef:
-        name: function-auto-ready
+        name: crossplane-contrib-function-auto-ready
+---
+apiVersion: example.org/v1alpha1
+kind: Database
+metadata:
+  name: drupal-db
+  namespace: drupal-app
+spec:
+  storage: 1Gi
+  username: drupal
+  password: drupalpass
+  database: drupal

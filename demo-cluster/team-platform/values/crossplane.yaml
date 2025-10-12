@@ -7,3 +7,4 @@ provider:
 function:
   packages: 
     - "xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.11.0"
+    - "xpkg.upbound.io/crossplane-contrib/function-auto-ready:v0.5.1"

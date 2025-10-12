@@ -1,3 +1,6 @@
+# -----------------------------------------------------
+# 1. Provider: Helm
+# -----------------------------------------------------
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
@@ -5,7 +8,7 @@ metadata:
 spec:
   package: xpkg.upbound.io/crossplane-contrib/provider-helm:v1.0.2
 ---
-apiVersion: apiextensions.crossplane.io/v1
+apiVersion: apiextensions.crossplane.io/v1beta1
 kind: CompositeResourceDefinition
 metadata:
   name: mariadbinstances.database.mycompany.io
@@ -17,6 +20,12 @@ spec:
   claimNames:
     kind: MariaDBInstance
     plural: mariadbinstances
+  defaultCompositionRef:
+    name: mariadbinstance-composition
+  connectionSecretKeys:
+    - username
+    - password
+    - endpoint
   versions:
     - name: v1alpha1
       served: true
@@ -42,6 +51,9 @@ spec:
                     password:
                       type: string
 ---
+# -----------------------------------------------------
+# 4. Composition (uses Helm provider only)
+# -----------------------------------------------------
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
@@ -50,13 +62,13 @@ spec:
   compositeTypeRef:
     apiVersion: database.mycompany.io/v1alpha1
     kind: MariaDBInstance
+  writeConnectionSecretsToNamespace: crossplane-system
   resources:
     - name: mariadb
       base:
-        apiVersion: helm.crossplane.io/v1beta1
+        apiVersion: helm.crossplane.io/v1
         kind: Release
         metadata:
-          name: mariadb
           namespace: crossplane-system
         spec:
           providerConfigRef:
@@ -76,9 +88,12 @@ spec:
                   size: 8Gi
               auth:
                 rootPassword: root
-                database: exampledb
+                database: defaultdb
                 username: user
                 password: pass
+          writeConnectionSecretToRef:
+            namespace: crossplane-system
+            name: mariadb-conn
       patches:
         - type: FromCompositeFieldPath
           fromFieldPath: spec.parameters.version
@@ -105,3 +120,18 @@ spec:
           toFieldPath: spec.forProvider.values.primary.persistence.size
           policy:
             fromFieldPath: Optional
+---
+# -----------------------------------------------------
+# 5. Example Claim (developer request)
+# -----------------------------------------------------
+apiVersion: database.mycompany.io/v1alpha1
+kind: MariaDBInstance
+metadata:
+  name: dev-db
+spec:
+  parameters:
+    version: "10.6.12"
+    database: "appdb"
+    username: "appuser"
+    password: "SuperSecret123"
+    size: "8Gi"

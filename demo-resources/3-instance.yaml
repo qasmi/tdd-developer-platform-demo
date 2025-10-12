@@ -1,11 +1,11 @@
 apiVersion: database.mycompany.io/v1alpha1
 kind: MariaDBInstance
 metadata:
-  name: dev-mariadb
+  name: dev-db
 spec:
   parameters:
-    version: "10.6.12"
+    version: "10.6"
+    database: "appdb"
+    username: "appuser"
+    password: "SuperSecret123"
     size: "8Gi"
-    database: "devdb"
-    username: "devuser"
-    password: "SuperSecret!"

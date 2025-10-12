@@ -1,12 +1,9 @@
 provider:
   packages: 
     - "xpkg.upbound.io/crossplane-contrib/provider-helm:v1.0.2"
-    - "xpkg.upbound.io/upbound/provider-kubernetes:v1"
+    - "xpkg.upbound.io/crossplane-contrib/provider-kubernetes:v1.0.0"
   defaultActivations: ["*"]
 
 function:
   packages: 
     - "xpkg.upbound.io/crossplane-contrib/function-go-templating:v0.11.0"
-    - "xpkg.upbound.io/crossplane-contrib/function-kubernetes-apply:v0.10.0"
-    - "xpkg.upbound.io/crossplane-contrib/function-go-template:v0.7.0"
-    - "xpkg.upbound.io/crossplane-contrib/function-kubernetes-apply:v0.7.0"

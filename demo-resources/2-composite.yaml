@@ -1,17 +1,15 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: databases.example.org
+  name: mariadbinstances.database.mycompany.io
 spec:
-  group: example.org
+  group: database.mycompany.io
   names:
-    kind: Database
-    plural: databases
+    kind: MariaDBInstance
+    plural: mariadbinstances
   claimNames:
-    kind: Database
-    plural: databases
-  defaultCompositionRef:
-    name: mariadbcomposition
+    kind: MariaDBInstance
+    plural: mariadbinstances
   versions:
     - name: v1alpha1
       served: true
@@ -23,74 +21,77 @@ spec:
             spec:
               type: object
               properties:
-                storage:
-                  type: string
-                  default: 1Gi
-                username:
-                  type: string
-                  default: drupal
-                password:
-                  type: string
-                  default: drupalpass
-                database:
-                  type: string
-                  default: drupal
-              required:
-                - username
-                - password
-                - database
+                parameters:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    storageSize:
+                      type: string
+                    user:
+                      type: string
+                    password:
+                      type: string
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: mariadbcomposition
+  name: mariadbinstance-composition
 spec:
   compositeTypeRef:
-    apiVersion: example.org/v1alpha1
-    kind: Database
+    apiVersion: database.mycompany.io/v1alpha1
+    kind: MariaDBInstance
   mode: Pipeline
   pipeline:
-    - step: render-helmrelease
+    - step: generate-password
       functionRef:
-        name: crossplane-contrib-function-go-templating
+        name: function-random
       input:
-        apiVersion: gotemplating.fn.crossplane.io/v1beta1
-        kind: GoTemplate
-        source: Inline
-        inline:
-          template: |
-            apiVersion: helm.crossplane.io/v1beta1
+        apiVersion: fn.crossplane.io/v1beta1
+        kind: Input
+        parameters:
+          key: password
+          length: 16
+
+    - step: deploy-mariadb
+      functionRef:
+        name: function-apply
+      input:
+        apiVersion: fn.crossplane.io/v1beta1
+        kind: Input
+        resources:
+          - apiVersion: helm.crossplane.io/v1beta1
             kind: Release
             metadata:
-              name: mariadb
-              namespace: {{ .observed.composite.resource.metadata.namespace }}
+              name: mariadb-release
+              namespace: database-namespace
             spec:
+              providerConfigRef:
+                name: example-helm-config
               forProvider:
                 chart:
                   name: mariadb
                   repository: https://charts.bitnami.com/bitnami
-                  version: "14.1.0"
-                namespace: {{ .observed.composite.resource.metadata.namespace }}
+                  version: 12.3.0
+                namespace: mariadb-ns
                 values:
+                  image:
+                    repository: bitnami/mariadb
+                    tag: "10.6.12"
                   auth:
-                    rootPassword: rootpass
-                    username: {{ .observed.composite.resource.spec.username }}
-                    password: {{ .observed.composite.resource.spec.password }}
-                    database: {{ .observed.composite.resource.spec.database }}
-                  primary:
-                    persistence:
-                      size: {{ .observed.composite.resource.spec.storage }}
-    - step: set-ready
-      functionRef:
-        name: crossplane-contrib-function-auto-ready
+                    rootPassword: $(password)
+                    database: exampledb
+                    username: exampleuser
+                  persistence:
+                    enabled: true
+                    size: 8Gi
 ---
-apiVersion: example.org/v1alpha1
-kind: Database
+apiVersion: database.mycompany.io/v1alpha1
+kind: MariaDBInstance
 metadata:
-  name: drupal-db
-  namespace: drupal-app
+  name: dev-mariadb
 spec:
-  storage: 1Gi
-  username: drupal
-  password: drupalpass
-  database: drupal
+  parameters:
+    version: "10.6"
+    storageSize: "8Gi"
+    user: devuser

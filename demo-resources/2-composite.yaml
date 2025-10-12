@@ -1,17 +1,9 @@
 apiVersion: pkg.crossplane.io/v1
 kind: Provider
 metadata:
-  name: provider-helm
+  name: crossplane-contrib-provider-helm
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-helm:v0.16.0
----
-apiVersion: helm.crossplane.io/v1beta1
-kind: ProviderConfig
-metadata:
-  name: in-cluster-helm
-spec:
-  credentials:
-    source: None
+  package: xpkg.upbound.io/crossplane-contrib/provider-helm:v1.0.2
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
@@ -113,4 +105,3 @@ spec:
           toFieldPath: spec.forProvider.values.primary.persistence.size
           policy:
             fromFieldPath: Optional
----

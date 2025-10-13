@@ -9,4 +9,4 @@ spec:
     database: "appdb"
     username: "appuser"
     password: "SuperSecret123"
-    size: "8Gi"
+    size: "1Gi"

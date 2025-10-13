@@ -1,0 +1,162 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: helm-operator-role
+  namespace: drupal-app
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: helm-operator-rolebinding
+  namespace: drupal-app
+subjects:
+  - kind: ServiceAccount
+    name: provider-helm-c4d1cb4e84cf
+    namespace: crossplane
+roleRef:
+  kind: Role
+  name: helm-operator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: helm.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: in-cluster-helm
+spec:
+  credentials:
+    source: InjectedIdentity
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: mariadbinstances.database.mycompany.io
+spec:
+  group: database.mycompany.io
+  names:
+    kind: MariaDBInstance
+    plural: mariadbinstances
+  claimNames:                   # 👈 must NOT reuse the same kind name
+    kind: MariaDBInstanceClaim  # 👈 new, unique name
+    plural: mariadbinstanceclaims
+  defaultCompositionRef:
+    name: mariadbinstance-composition
+  connectionSecretKeys:
+    - username
+    - password
+    - endpoint
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    size:
+                      type: string
+                    database:
+                      type: string
+                    username:
+                      type: string
+                    password:
+                      type: string
+
+---
+# -----------------------------------------------------
+# 4. Composition (uses Helm provider only)
+# -----------------------------------------------------
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-patch-and-transform
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-patch-and-transform:v0.9.1
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: mariadbinstance-composition
+spec:
+  compositeTypeRef:
+    apiVersion: database.mycompany.io/v1alpha1
+    kind: MariaDBInstance
+  mode: Pipeline
+  pipeline:
+    - step: deploy-mariadb
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: mariadb
+            base:
+              apiVersion: helm.crossplane.io/v1beta1
+              kind: Release
+              metadata:
+                namespace: crossplane
+              spec:
+                providerConfigRef:
+                  name: in-cluster-helm
+                forProvider:
+                  namespace: "drupal-app"
+                  chart:
+                    repository: https://charts.bitnami.com/bitnami
+                    name: mariadb
+                    version: 23.0.5
+                  values:
+                    image:
+                      repository: bitnamilegacy/mariadb
+                      tag: "12.0.2-debian-12-r0"
+                    auth:
+                      rootPassword: root
+                      database: exampledb
+                      username: user
+                      password: pass
+                    primary:
+                      persistence:
+                        enabled: true
+                        size: 8Gi
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.version
+                toFieldPath: spec.forProvider.values.image.tag
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.database
+                toFieldPath: spec.forProvider.values.auth.database
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.username
+                toFieldPath: spec.forProvider.values.auth.username
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.password
+                toFieldPath: spec.forProvider.values.auth.password
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.size
+                toFieldPath: spec.forProvider.values.primary.persistence.size
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.namespace
+                policy:
+                  fromFieldPath: Optional

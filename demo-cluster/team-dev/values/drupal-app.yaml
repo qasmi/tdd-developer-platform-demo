@@ -7,9 +7,9 @@ drupalUsername: admin
 externalDatabase:
   host: mariadb.drupal-app.svc.cluster.local
   port: 3306
-  database: bitnami_drupal
+  database: drupal
   user: drupal
-  existingSecret: "drupal-app-externaldb"
+  password: "SuperSecret123"
 
 mariadb:
   enabled: false

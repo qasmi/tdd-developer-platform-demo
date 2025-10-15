@@ -120,15 +120,16 @@ spec:
               kind: Release
               metadata:
                 namespace: crossplane
+                name: mariadb
               spec:
                 providerConfigRef:
                   name: in-cluster-helm
                 forProvider:
-                  namespace: "drupal-app"
+                  namespace: "drupal-app" # TOFIX
                   chart:
                     repository: https://charts.bitnami.com/bitnami
                     name: mariadb
-                    version: 19.1.0
+                    version: 22.0.0
                   values:
                     image:
                       repository: bitnamilegacy/mariadb
@@ -169,7 +170,7 @@ spec:
                 policy:
                   fromFieldPath: Optional
               - type: FromCompositeFieldPath
-                fromFieldPath: metadata.namespace
+                fromFieldPath: metadata.namespace # TOFIX
                 toFieldPath: spec.forProvider.namespace
                 policy:
                   fromFieldPath: Optional

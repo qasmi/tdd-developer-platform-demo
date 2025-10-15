@@ -1,12 +1,12 @@
 apiVersion: database.mycompany.io/v1alpha1
 kind: MariaDBInstanceClaim
 metadata:
-  name: dev-db
+  name: drupal-db
   namespace: drupal-app
 spec:
   parameters:
-    version: "20.0.0"
-    database: "appdb"
-    username: "appuser"
+    version: "12.0"
+    database: "drupal"
+    username: "drupal"
     password: "SuperSecret123"
     size: "1Gi"

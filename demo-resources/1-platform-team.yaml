@@ -1,4 +1,17 @@
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: provider-helm-namespace-admin
+subjects:
+  - kind: ServiceAccount
+    name: crossplane-contrib-provider-helm-c4d1cb4e84cf # TOFIX
+    namespace: crossplane
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: helm-operator-role
@@ -15,7 +28,7 @@ metadata:
   namespace: drupal-app
 subjects:
   - kind: ServiceAccount
-    name: provider-helm-c4d1cb4e84cf
+    name: crossplane-contrib-provider-helm-c4d1cb4e84cf
     namespace: crossplane
 roleRef:
   kind: Role
@@ -39,8 +52,8 @@ spec:
   names:
     kind: MariaDBInstance
     plural: mariadbinstances
-  claimNames:                   # 👈 must NOT reuse the same kind name
-    kind: MariaDBInstanceClaim  # 👈 new, unique name
+  claimNames: 
+    kind: MariaDBInstanceClaim 
     plural: mariadbinstanceclaims
   defaultCompositionRef:
     name: mariadbinstance-composition
@@ -115,7 +128,7 @@ spec:
                   chart:
                     repository: https://charts.bitnami.com/bitnami
                     name: mariadb
-                    version: 23.0.5
+                    version: 19.1.0
                   values:
                     image:
                       repository: bitnamilegacy/mariadb
@@ -128,7 +141,7 @@ spec:
                     primary:
                       persistence:
                         enabled: true
-                        size: 8Gi
+                        size: 1Gi
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.version

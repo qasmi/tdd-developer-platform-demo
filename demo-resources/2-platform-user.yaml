@@ -5,7 +5,7 @@ metadata:
   namespace: drupal-app
 spec:
   parameters:
-    version: "23.0.5"
+    version: "20.0.0"
     database: "appdb"
     username: "appuser"
     password: "SuperSecret123"

@@ -13,3 +13,7 @@ externalDatabase:
 
 mariadb:
   enabled: false
+
+service:
+  type: LoadBalancer
+  loadBalancerIP: "172.18.250.1"

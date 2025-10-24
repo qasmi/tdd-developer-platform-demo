@@ -34,3 +34,13 @@ jobs:
           else
             echo "No changes to commit."
           fi
+
+      - name: Install Chainsaw
+        uses: kyverno/action-install-chainsaw@v0.1.0
+        with:
+          release: v0.0.9
+
+      - name: Run Tests
+        run: |
+          cd ./demo-cluster/test
+          chainsaw test

@@ -1,5 +1,5 @@
 apiVersion: database.kubecon.io/v1alpha1
-kind: MariaDBInstanceClaim
+kind: MariaDBInstance
 metadata:
   name: drupal-db
   namespace: drupal-app

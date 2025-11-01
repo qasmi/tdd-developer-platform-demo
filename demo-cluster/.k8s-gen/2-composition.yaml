@@ -1,4 +1,3 @@
-
 ---
 apiVersion: helm.crossplane.io/v1beta1
 kind: ProviderConfig
@@ -91,7 +90,7 @@ spec:
                       rootPassword: root
                       database: exampledb
                       username: user
-                      password: superPass123!
+                      password: superPass123! # TODO generate random pwd
                     persistence:
                       enabled: true
                       size: 1Gi

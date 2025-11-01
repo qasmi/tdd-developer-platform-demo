@@ -7,5 +7,4 @@ spec:
   parameters:
     database: "drupal"
     username: "drupal"
-    password: "SuperSecret1234"
     size: "2Gi"

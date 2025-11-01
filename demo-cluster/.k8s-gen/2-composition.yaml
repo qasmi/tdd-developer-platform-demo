@@ -102,7 +102,7 @@ spec:
             connectionDetails:
               - name: db-username
                 type: FromFieldPath
-                fromFieldPath: spec.forProvider.values.auth.password
+                fromFieldPath: spec.forProvider.values.auth.username
               - name: db-password
                 type: FromFieldPath
                 fromFieldPath: spec.forProvider.values.auth.password

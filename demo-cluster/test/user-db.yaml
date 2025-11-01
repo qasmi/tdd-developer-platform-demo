@@ -1,4 +1,4 @@
-apiVersion: database.mycompany.io/v1alpha1
+apiVersion: database.kubecon.io/v1alpha1
 kind: MariaDBInstanceClaim
 metadata:
   name: drupal-db

@@ -134,7 +134,7 @@ spec:
                 toFieldPath: spec.forProvider.values.primary.persistence.size
                 policy:
                   fromFieldPath: Optional
-              - fromFieldPath: "spec.parameters.namespace"
+              - fromFieldPath: "metadata.namespace"
                 toFieldPath: "spec.forProvider.namespace"
           #- name: connection-service
           #  base:

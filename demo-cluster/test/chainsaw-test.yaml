@@ -25,4 +25,5 @@ spec:
     #          name: mariadb
     #          namespace: drupal-app
     #        spec:
-    #          # ???
+    #          data:
+      #          db-password# ???

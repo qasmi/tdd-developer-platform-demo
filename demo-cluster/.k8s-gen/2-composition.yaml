@@ -11,9 +11,9 @@ spec:
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
-  name: mariadbinstances.database.mycompany.io
+  name: mariadbinstances.database.kubecon.io
 spec:
-  group: database.mycompany.io
+  group: database.kubecon.io
   names:
     kind: MariaDBInstance
     plural: mariadbinstances
@@ -59,7 +59,7 @@ metadata:
   name: mariadbinstance-composition
 spec:
   compositeTypeRef:
-    apiVersion: database.mycompany.io/v1alpha1
+    apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
   mode: Pipeline
   pipeline:

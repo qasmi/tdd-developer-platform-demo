@@ -37,7 +37,7 @@ spec:
                 parameters:
                   type: object
                   properties:
-                    version:
+                    namespace:
                       type: string
                     size:
                       type: string

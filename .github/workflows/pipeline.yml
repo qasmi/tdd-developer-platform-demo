@@ -43,7 +43,8 @@ jobs:
       - name: Run Tests
         run: |
           mkdir ~/.kube 
-          echo $KUBECONFIG > ~/.kube/config
+          echo ${{ secrets.KUBECONFIG }} > ~/.kube/config
+          cat 
           kubectl get pod 
           cd ./demo-cluster/test
           chainsaw test

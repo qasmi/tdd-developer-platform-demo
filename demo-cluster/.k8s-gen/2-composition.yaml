@@ -91,9 +91,10 @@ spec:
                       database: exampledb
                       username: user
                       password: superPass123! # TODO generate random pwd
-                    persistence:
-                      enabled: true
-                      size: 1Gi
+                    primary:
+                      persistence:
+                        enabled: true
+                        size: 1Gi
             connectionDetails:
               - name: db-password
                 type: FromFieldPath
@@ -116,7 +117,7 @@ spec:
                   fromFieldPath: Optional
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.size
-                toFieldPath: spec.forProvider.values.persistence.size
+                toFieldPath: spec.forProvider.values.primary.persistence.size
                 policy:
                   fromFieldPath: Optional
               - fromFieldPath: metadata.namespace

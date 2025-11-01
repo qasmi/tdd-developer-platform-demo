@@ -40,14 +40,14 @@ jobs:
         with:
           release: v0.0.9
 
+      - name: Setup kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+
       - name: Run Tests
         run: |
-          set +x
-          mkdir ~/.kube 
-          printf "%s" "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
-          export KUBECONFIG=~/.kube/config
-          cat ~/.kube/config
-          kubectl get pod
+          kubectl cluster-info
           cd ./demo-cluster/test
           chainsaw test

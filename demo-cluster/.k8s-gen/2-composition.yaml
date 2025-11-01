@@ -100,9 +100,6 @@ spec:
                         enabled: true
                         size: 1Gi
             connectionDetails:
-              - name: db-username
-                type: FromFieldPath
-                fromFieldPath: spec.forProvider.values.auth.username
               - name: db-password
                 type: FromFieldPath
                 fromFieldPath: spec.forProvider.values.auth.password
@@ -127,6 +124,7 @@ spec:
                 toFieldPath: spec.forProvider.values.primary.persistence.size
                 policy:
                   fromFieldPath: Optional
+              # TOFIX
               #- fromFieldPath: metadata.namespace
               #  toFieldPath: spec.forProvider.namespace
           - name: connection-service

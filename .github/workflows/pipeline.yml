@@ -44,5 +44,6 @@ jobs:
         run: |
           mkdir ~/.kube 
           echo $KUBECONFIG > ~/.kube/config
+          kubectl get pod 
           cd ./demo-cluster/test
           chainsaw test

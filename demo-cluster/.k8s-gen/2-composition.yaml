@@ -91,7 +91,7 @@ spec:
                       rootPassword: root
                       database: exampledb
                       username: user
-                      password: pass
+                      password: superPass123!
                     primary:
                       persistence:
                         enabled: true
@@ -123,18 +123,3 @@ spec:
                   fromFieldPath: Optional
               - fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.namespace
-          - name: connection-service
-            base:
-              apiVersion: v1
-              kind: Service
-              metadata:
-                name: mariadb-connection
-              spec:
-                ports:
-                - port: 3306
-                  targetPort: 3306
-                selector:
-                  app.kubernetes.io/name: mariadb
-            patches:
-              - fromFieldPath: metadata.namespace
-                toFieldPath: metadata.namespace

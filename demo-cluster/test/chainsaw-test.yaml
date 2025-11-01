@@ -1,11 +1,48 @@
-apiVersion: chainsaw.kyverno.io/v1alpha1
+apiVersion: chainsaw.crossplane.io/v1alpha1
 kind: Test
 metadata:
-  name: clusterrolebindings
+  name: test-database-secret-dependency
 spec:
   steps:
-  - try:
-    - apply:
-        file: user-db.yaml
-    - assert:
-        file: expected.yaml # TODO
+  - name: Create Database
+    apply:
+      file: ./user-db.yaml
+  - name: Wait for Database readiness
+    assert:
+      resources:
+        - apiVersion: database.kubecon.io/v1alpha1
+          kind: MariaDBInstance
+          name: mariadb
+          namespace: drupal-app
+          conditions:
+            - type: Ready
+              status: "True"
+
+  - name: Check connectionSecretRef exists
+    assert:
+      resources:
+        - apiVersion: database.kubecon.io/v1alpha1
+          kind: MariaDBInstance
+          name: mariadb
+          namespace: drupal-app
+          fields:
+            status.connectionSecretRef.name: .+
+
+  - name: Assert Secret presence and content
+    assert:
+      resources:
+        - apiVersion: v1
+          kind: Secret
+          nameRef:
+            apiVersion: database.kubecon.io/v1alpha1
+            kind: MariaDBInstance
+            name: mariadb
+            namespace: drupal-app
+            fieldPath: status.connectionSecretRef.name
+          namespace: drupal-app
+          fields:
+            data.db-password: .+
+
+  - name: Cleanup
+    delete:
+      file: ./user-db.yaml

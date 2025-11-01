@@ -13,6 +13,7 @@ kind: CompositeResourceDefinition
 metadata:
   name: mariadbinstances.database.kubecon.io
 spec:
+  scope: Namespaced
   group: database.kubecon.io
   names:
     kind: MariaDBInstance
@@ -120,9 +121,8 @@ spec:
                 toFieldPath: spec.forProvider.values.primary.persistence.size
                 policy:
                   fromFieldPath: Optional
-              # TOFIX
-              #- fromFieldPath: metadata.namespace
-              #  toFieldPath: spec.forProvider.namespace
+              - fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.namespace
           - name: connection-service
             base:
               apiVersion: v1

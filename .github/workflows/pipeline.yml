@@ -46,5 +46,6 @@ jobs:
           mkdir ~/.kube 
           printf "%s" "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
+          kubectl get pod
           cd ./demo-cluster/test
           chainsaw test

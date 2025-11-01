@@ -47,6 +47,7 @@ jobs:
           printf "%s" "${{ secrets.KUBE_CONFIG }}" > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
           export KUBECONFIG=~/.kube/config
+          cat ~/.kube/config
           kubectl get pod
           cd ./demo-cluster/test
           chainsaw test

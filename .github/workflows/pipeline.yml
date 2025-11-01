@@ -42,6 +42,7 @@ jobs:
 
       - name: Run Tests
         run: |
+          mkdir ~/.kube 
           echo $KUBECONFIG > ~/.kube/config
           cd ./demo-cluster/test
           chainsaw test

@@ -41,12 +41,11 @@ jobs:
           release: v0.0.9
 
       - name: Setup kubeconfig
-        env:
-          KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
         run: |
-          mkdir -p $HOME/.kube
-          echo $KUBECONFIG > $HOME/.kube/config
-          chmod 600 $HOME/.kube/config
+          mkdir -p ~/.kube
+          printf "%s" "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          chmod 600 ~/.kube/config
+          cat ~/.kube/config
 
       - name: Run Tests
         run: |

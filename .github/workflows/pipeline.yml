@@ -43,9 +43,8 @@ jobs:
       - name: Setup kubeconfig
         run: |
           mkdir -p ~/.kube
-          printf "%s" "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
-          cat ~/.kube/config
 
       - name: Run Tests
         run: |

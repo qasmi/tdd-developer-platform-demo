@@ -5,8 +5,7 @@ metadata:
   namespace: drupal-app
 spec:
   parameters:
-    version: "12.0"
     database: "drupal"
     username: "drupal"
     password: "SuperSecret123"
-    size: "1Gi"
+    size: "2Gi"

@@ -1,0 +1,140 @@
+
+---
+apiVersion: helm.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: in-cluster-helm
+spec:
+  credentials:
+    source: InjectedIdentity
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: mariadbinstances.database.kubecon.io
+spec:
+  scope: Cluster
+  group: database.kubecon.io
+  names:
+    kind: MariaDBInstance
+    plural: mariadbinstances
+  defaultCompositionRef:
+    name: mariadbinstance-composition
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    size:
+                      type: string
+                    database:
+                      type: string
+                    username:
+                      type: string
+                    password:
+                      type: string
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-patch-and-transform
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-patch-and-transform:v0.9.1
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: mariadbinstance-composition
+spec:
+  compositeTypeRef:
+    apiVersion: database.kubecon.io/v1alpha1
+    kind: MariaDBInstance
+  mode: Pipeline
+  pipeline:
+    - step: deploy-mariadb
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: mariadb
+            base:
+              apiVersion: helm.crossplane.io/v1beta1
+              kind: Release
+              metadata:
+                namespace: crossplane
+                name: mariadb
+              spec:
+                providerConfigRef:
+                  name: in-cluster-helm
+                forProvider:
+                  namespace: "drupal-app"
+                  chart:
+                    repository: https://charts.bitnami.com/bitnami
+                    name: mariadb
+                    version: 22.0.0
+                  values:
+                    image:
+                      repository: bitnamilegacy/mariadb
+                      tag: "12.0.2-debian-12-r0"
+                    auth:
+                      rootPassword: root
+                      database: exampledb
+                      username: user
+                      password: pass
+                    primary:
+                      persistence:
+                        enabled: true
+                        size: 1Gi
+            connectionDetails:
+              - name: db-password
+                type: FromFieldPath
+                fromFieldPath: spec.forProvider.values.auth.password
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.database
+                toFieldPath: spec.forProvider.values.auth.database
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.username
+                toFieldPath: spec.forProvider.values.auth.username
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.password
+                toFieldPath: spec.forProvider.values.auth.password
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.size
+                toFieldPath: spec.forProvider.values.primary.persistence.size
+                policy:
+                  fromFieldPath: Optional
+              - fromFieldPath: metadata.namespace
+                toFieldPath: spec.forProvider.namespace
+          - name: connection-service
+            base:
+              apiVersion: v1
+              kind: Service
+              metadata:
+                name: mariadb-connection
+              spec:
+                ports:
+                - port: 3306
+                  targetPort: 3306
+                selector:
+                  app.kubernetes.io/name: mariadb
+            patches:
+              - fromFieldPath: metadata.namespace
+                toFieldPath: metadata.namespace

@@ -5,6 +5,7 @@ metadata:
   namespace: drupal-app
 spec:
   parameters:
+    namespace: "drupal-app"
     database: "drupal"
     username: "drupal"
     password: "SuperSecret123"

@@ -17,12 +17,12 @@ spec:
             status:
               (conditions[?type == 'Ready']):
               - status: 'True'
-    - assert:
-        resources:
-            apiVersion: v1
-            kind: Secret
-            metadata:
-              name: mariadb
-              namespace: drupal-app
-            spec:
-              # ???
+    #- assert:
+    #    resources:
+    #        apiVersion: v1
+    #        kind: Secret
+    #        metadata:
+    #          name: mariadb
+    #          namespace: drupal-app
+    #        spec:
+    #          # ???

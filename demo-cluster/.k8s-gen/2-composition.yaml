@@ -37,8 +37,6 @@ spec:
                 parameters:
                   type: object
                   properties:
-                    namespace:
-                      type: string
                     size:
                       type: string
                     database:
@@ -83,7 +81,7 @@ spec:
                 providerConfigRef:
                   name: in-cluster-helm
                 forProvider:
-                  namespace: "default"
+                  namespace: "drupal-app"
                   chart:
                     repository: https://charts.bitnami.com/bitnami
                     name: mariadb
@@ -129,8 +127,8 @@ spec:
                 toFieldPath: spec.forProvider.values.primary.persistence.size
                 policy:
                   fromFieldPath: Optional
-              - fromFieldPath: metadata.namespace
-                toFieldPath: spec.forProvider.namespace
+              #- fromFieldPath: metadata.namespace
+              #  toFieldPath: spec.forProvider.namespace
           #- name: connection-service
           #  base:
           #    apiVersion: v1

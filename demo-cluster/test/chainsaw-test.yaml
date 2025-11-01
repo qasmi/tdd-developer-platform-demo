@@ -8,7 +8,7 @@ spec:
     - apply:
         file: user-db.yaml
     - assert:
-        resources:
+        resource:
             apiVersion: database.kubecon.io/v1alpha1
             kind: MariaDBInstance
             metadata:
@@ -18,7 +18,7 @@ spec:
               (conditions[?type == 'Ready']):
               - status: 'True'
     #- assert:
-    #    resources:
+    #    resource:
     #        apiVersion: v1
     #        kind: Secret
     #        metadata:

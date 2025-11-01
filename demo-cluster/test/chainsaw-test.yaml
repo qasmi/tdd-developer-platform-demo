@@ -16,8 +16,7 @@ spec:
             conditions:
               - type: Ready
                 status: "True"
-    - name: Check connectionSecretRef exists
-      assert:
+    - assert:
         resources:
           - apiVersion: database.kubecon.io/v1alpha1
             kind: MariaDBInstance
@@ -25,8 +24,7 @@ spec:
             namespace: drupal-app
             fields:
               status.connectionSecretRef.name: .+
-    - name: Assert Secret presence and content
-      assert:
+    - assert:
         resources:
           - apiVersion: v1
             kind: Secret

@@ -133,15 +133,13 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
-                #managementPolicies:
-                #  - Observe  # Important: only observe, don’t create/delete
                 forProvider:
                   manifest:
                     resource:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: drupal-db-conn  # must match the secret created by Helm
+                        name: drupal-db-conn 
                         namespace: drupal-app
                         dataFrom:
                           db-password: "superPass123!"

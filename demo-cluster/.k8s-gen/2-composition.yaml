@@ -76,6 +76,7 @@ spec:
                   name: in-cluster-helm
                 forProvider:
                   namespace: "drupal-app"
+                  createNamespace: false
                   chart:
                     repository: https://charts.bitnami.com/bitnami
                     name: mariadb

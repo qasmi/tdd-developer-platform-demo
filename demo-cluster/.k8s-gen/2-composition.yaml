@@ -98,7 +98,6 @@ spec:
                   name: drupal-db-conn
                 connectionDetails:
                   - name: db-password
-                    type: FromValue
                     value: "docs.crossplane.io"
             patches:
               - type: FromCompositeFieldPath

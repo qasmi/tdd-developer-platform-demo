@@ -101,6 +101,7 @@ spec:
               #  fromFieldPath: spec.forProvider.values.auth.password
               #  connectionDetails:
               - name: db-password
+                type: FromConnectionSecretKey
                 fromConnectionSecretKey: mariadb-password
             patches:
               - type: FromCompositeFieldPath

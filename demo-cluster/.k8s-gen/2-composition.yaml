@@ -65,10 +65,6 @@ spec:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
 
-  writeConnectionSecretToRef:
-    name: drupal-db-conn
-    namespace: drupal-app
-
   # Use Function pipeline mode
   mode: Pipeline
   pipeline:
@@ -152,18 +148,9 @@ spec:
                         name: mariadb      # must match the secret created by Helm
                         namespace: drupal-app
             connectionDetails:
-              - name: db-password
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: mariadb-password
-              - name: db-root-password
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: mariadb-root-password
-              - name: db-username
-                type: FromValue
-                value: user
-              - name: db-database
-                type: FromValue
-                value: exampledb
+            - name: db-password
+              type: FromValue
+              value: "superPass123!"
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

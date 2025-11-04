@@ -133,15 +133,15 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
-                managementPolicies:
-                  - Observe  # Important: only observe, don’t create/delete
+                #managementPolicies:
+                #  - Observe  # Important: only observe, don’t create/delete
                 forProvider:
-                  manifestFrom:
+                  manifest:
                     resource:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: mariadb     # must match the secret created by Helm
+                        name: drupal-db-conn  # must match the secret created by Helm
                         namespace: drupal-app
             connectionDetails:
             - name: db-password

@@ -288,20 +288,8 @@ spec:
                       namespace: drupal-app
                     type: Opaque
                     data:
-                      username: dXNlcg==
-                      password: c3VwZXJQYXNzMTIzIQ==
-                      database: ZXhhbXBsZWRi
-                      host: bWFyaWFkYg==
+                      db-password: c3VwZXJQYXNzMTIzIQ==
             connectionDetails:
-              - name: username
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: username
-              - name: password
+              - name: db-password
                 type: FromConnectionSecretKey
                 fromConnectionSecretKey: password
-              - name: database
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: database
-              - name: host
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: host

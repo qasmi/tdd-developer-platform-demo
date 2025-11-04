@@ -60,12 +60,15 @@ kind: Composition
 metadata:
   name: mariadbinstance-composition
 spec:
-  # This defines the composite type it implements
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
 
-  # Use Function pipeline mode
+  # Tells Crossplane to write the aggregated connection here
+  writeConnectionSecretToRef:
+    name: drupal-db-conn
+    namespace: drupal-app
+
   mode: Pipeline
   pipeline:
     - step: deploy-mariadb
@@ -75,9 +78,9 @@ spec:
         apiVersion: pt.fn.crossplane.io/v1beta1
         kind: Resources
         resources:
-          # ---------------------
-          # 1️⃣ Helm Release — deploy MariaDB
-          # ---------------------
+          # -------------------------------------------------
+          # 1️⃣ Install MariaDB Helm Release
+          # -------------------------------------------------
           - name: mariadb
             base:
               apiVersion: helm.crossplane.io/v1beta1
@@ -107,6 +110,10 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
+              writeConnectionSecretToRef:
+                name: mariadb
+                namespace: drupal-app
+
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database
@@ -120,9 +127,9 @@ spec:
               - fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.namespace
 
-          # ---------------------
-          # 2️⃣ Observe the secret Helm creates and extract connection details
-          # ---------------------
+          # -------------------------------------------------
+          # 2️⃣ Observe Helm-generated Secret
+          # -------------------------------------------------
           - name: mariadb-secret
             base:
               apiVersion: kubernetes.crossplane.io/v1alpha2
@@ -133,16 +140,109 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
+                managementPolicies:
+                  - Observe
                 forProvider:
-                  manifest:
+                  manifestFrom:
                     resource:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: drupal-db-conn 
+                        name: mariadb
                         namespace: drupal-app
-                        dataFrom:
-                          db-password: "superPass123!"
+            connectionDetails:
+              - name: db-password
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: mariadb-password
+
+#apiVersion: apiextensions.crossplane.io/v1
+#kind: Composition
+#metadata:
+#  name: mariadbinstance-composition
+#spec:
+#  # This defines the composite type it implements
+#  compositeTypeRef:
+#    apiVersion: database.kubecon.io/v1alpha1
+#    kind: MariaDBInstance
+#
+#  # Use Function pipeline mode
+#  mode: Pipeline
+#  pipeline:
+#    - step: deploy-mariadb
+#      functionRef:
+#        name: function-patch-and-transform
+#      input:
+#        apiVersion: pt.fn.crossplane.io/v1beta1
+#        kind: Resources
+#        resources:
+#          # ---------------------
+#          # 1️⃣ Helm Release — deploy MariaDB
+#          # ---------------------
+#          - name: mariadb
+#            base:
+#              apiVersion: helm.crossplane.io/v1beta1
+#              kind: Release
+#              metadata:
+#                namespace: crossplane
+#                name: mariadb
+#              spec:
+#                providerConfigRef:
+#                  name: in-cluster-helm
+#                forProvider:
+#                  namespace: drupal-app
+#                  chart:
+#                    repository: https://charts.bitnami.com/bitnami
+#                    name: mariadb
+#                    version: 22.0.0
+#                  values:
+#                    image:
+#                      repository: bitnamilegacy/mariadb
+#                      tag: "12.0.2-debian-12-r0"
+#                    auth:
+#                      rootPassword: root
+#                      database: exampledb
+#                      username: user
+#                      password: superPass123!
+#                    primary:
+#                      persistence:
+#                        enabled: true
+#                        size: 1Gi
+#            patches:
+#              - type: FromCompositeFieldPath
+#                fromFieldPath: spec.parameters.database
+#                toFieldPath: spec.forProvider.values.auth.database
+#              - type: FromCompositeFieldPath
+#                fromFieldPath: spec.parameters.username
+#                toFieldPath: spec.forProvider.values.auth.username
+#              - type: FromCompositeFieldPath
+#                fromFieldPath: spec.parameters.size
+#                toFieldPath: spec.forProvider.values.primary.persistence.size
+#              - fromFieldPath: metadata.namespace
+#                toFieldPath: spec.forProvider.namespace
+#
+#          # ---------------------
+#          # 2️⃣ Observe the secret Helm creates and extract connection details
+#          # ---------------------
+#          - name: mariadb-secret
+#            base:
+#              apiVersion: kubernetes.crossplane.io/v1alpha2
+#              kind: Object
+#              metadata:
+#                name: mariadb-secret-reader
+#                namespace: drupal-app
+#              spec:
+#                providerConfigRef:
+#                  name: in-cluster-kubernetes
+#                forProvider:
+#                  manifest:
+#                    resource:
+#                      apiVersion: v1
+#                      kind: Secret
+#                      metadata:
+#                        name: drupal-db-conn 
+#                        namespace: drupal-app
+#                        dataFrom:
+#                          db-password: "superPass123!"
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

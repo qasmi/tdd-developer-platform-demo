@@ -143,10 +143,8 @@ spec:
                       metadata:
                         name: drupal-db-conn  # must match the secret created by Helm
                         namespace: drupal-app
-            connectionDetails:
-            - name: db-password
-              type: FromValue
-              value: "superPass123!"
+                        dataFrom:
+                          db-password: "superPass123!"
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

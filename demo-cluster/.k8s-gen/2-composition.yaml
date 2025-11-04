@@ -1,15 +1,3 @@
-#apiVersion: rbac.authorization.k8s.io/v1
-#kind: ClusterRoleBinding
-#metadata:
-#  name: provider-helm-namespace-create
-#roleRef:
-#  apiGroup: rbac.authorization.k8s.io
-#  kind: ClusterRole
-#  name: cluster-admin  # or a narrower custom role, see below
-#subjects:
-#  - kind: ServiceAccount
-#    name: crossplane-contrib-provider-helm-c4d1cb4e84cf
-#    namespace: crossplane
 ---
 apiVersion: helm.crossplane.io/v1beta1
 kind: ProviderConfig
@@ -107,7 +95,6 @@ spec:
                         size: 1Gi
             connectionDetails:
               - name: db-password
-                type: FromFieldPath
                 fromFieldPath: spec.forProvider.values.auth.password
             patches:
               - type: FromCompositeFieldPath

@@ -75,7 +75,7 @@ spec:
                 providerConfigRef:
                   name: in-cluster-helm
                 writeConnectionSecretToRef:
-                  name: drupal-db-conn
+                  name: mariadb
                   namespace: "drupal-app"
                 forProvider:
                   namespace: "drupal-app"

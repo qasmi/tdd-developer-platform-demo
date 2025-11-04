@@ -94,14 +94,13 @@ spec:
                         enabled: true
                         size: 1Gi
                 writeConnectionSecretToRef:
+                  namespace: drupal-app
                   name: drupal-db-conn
-                  namespace: "drupal-app"
             connectionDetails:
               - name: db-password
                 type: FromValue
-                value: "test"
-                #type: FromFieldPath
-                #fromFieldPath: spec.forProvider.values.auth.password
+                value: "docs.crossplane.io"
+
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

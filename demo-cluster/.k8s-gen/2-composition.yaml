@@ -140,7 +140,7 @@ spec:
                 metadata:
                   name: mariadb
                   namespace: drupal-app
-      connectionDetails:
+        connectionDetails:
             - name: db-password
               type: FromValue
               value: "superPass123!"

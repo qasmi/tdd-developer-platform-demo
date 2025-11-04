@@ -133,7 +133,7 @@ spec:
                 managementPolicies:
                   - Observe
                 forProvider:
-                  manifestFrom:
+                  manifest:
                     resource:
                       apiVersion: v1
                       kind: Secret

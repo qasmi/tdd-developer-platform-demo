@@ -104,7 +104,6 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
-
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database
@@ -136,7 +135,7 @@ spec:
                     apiVersion: v1
                     kind: Secret
                     metadata:
-                      name: mariadb
+                      name: mariadb-conn
                       namespace: drupal-app
             connectionDetails:
               - name: db-password

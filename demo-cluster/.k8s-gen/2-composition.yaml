@@ -76,6 +76,7 @@ spec:
                   name: in-cluster-helm
                 writeConnectionSecretToRef:
                   name: drupal-db-conn
+                  namespace: "drupal-app"
                 forProvider:
                   namespace: "drupal-app"
                   chart:

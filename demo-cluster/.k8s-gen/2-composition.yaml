@@ -130,17 +130,20 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
+                managementPolicies:
+                  - Observe
                 forProvider:
-                  manifest:
-                    apiVersion: v1
-                    kind: Secret
-                    metadata:
-                      name: drupal-db-conn
-                      namespace: drupal-app
+                  manifestFrom:
+                    resource:
+                      apiVersion: v1
+                      kind: Secret
+                      metadata:
+                        name: mariadb
+                        namespace: drupal-app
             connectionDetails:
-              - name: db-password
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: mariadb-password
+            - name: db-password
+              type: FromValue
+              value: "superPass123!"
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

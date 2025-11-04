@@ -98,8 +98,10 @@ spec:
                         size: 1Gi
             connectionDetails:
               - name: db-password
-                type: FromFieldPath
-                fromFieldPath: spec.forProvider.values.auth.password
+                type: FromValue
+                value: "test"
+                #type: FromFieldPath
+                #fromFieldPath: spec.forProvider.values.auth.password
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

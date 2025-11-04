@@ -8,5 +8,4 @@ spec:
     database: "drupal"
     username: "drupal"
     size: "4Gi"
-  writeConnectionSecretToRef:
-    name: db-conn
+    

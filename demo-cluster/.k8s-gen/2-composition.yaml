@@ -98,9 +98,9 @@ spec:
                 writeConnectionSecretToRef:
                   namespace: drupal-app
                   name: drupal-db-conn
-            connectionDetails:
-              - name: db-password
-                value: "superPass123!"
+                connectionDetails:
+                  - name: db-password
+                    value: "superPass123!"
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

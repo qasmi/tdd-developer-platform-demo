@@ -135,7 +135,7 @@ spec:
                     apiVersion: v1
                     kind: Secret
                     metadata:
-                      name: mariadb-conn
+                      name: drupal-db-conn
                       namespace: drupal-app
             connectionDetails:
               - name: db-password

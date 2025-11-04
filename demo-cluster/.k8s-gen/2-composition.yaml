@@ -117,11 +117,4 @@ spec:
                   fromFieldPath: Optional
               - fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.namespace
-    - step: publish-connection
-      functionRef:
-        name: function-merge-secrets
-      input:
-        apiVersion: fn.crossplane.io/v1beta1
-        kind: MergeSecretsInput
-        fromConnectionDetails: true
-        mergeToComposite: true
+                

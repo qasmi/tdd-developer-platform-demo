@@ -226,12 +226,9 @@ spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
-
-  # This is where Crossplane writes the aggregated connection Secret
   writeConnectionSecretToRef:
     name: drupal-db-conn
     namespace: drupal-app
-
   mode: Pipeline
   pipeline:
     - step: deploy-mariadb
@@ -241,9 +238,6 @@ spec:
         apiVersion: pt.fn.crossplane.io/v1beta1
         kind: Resources
         resources:
-          # -------------------------------------------------
-          # 1️⃣ Deploy MariaDB via Helm
-          # -------------------------------------------------
           - name: mariadb
             base:
               apiVersion: helm.crossplane.io/v1beta1
@@ -274,42 +268,40 @@ spec:
                         enabled: true
                         size: 1Gi
 
-            patches:
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.database
-                toFieldPath: spec.forProvider.values.auth.database
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.username
-                toFieldPath: spec.forProvider.values.auth.username
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.size
-                toFieldPath: spec.forProvider.values.primary.persistence.size
-              - fromFieldPath: metadata.namespace
-                toFieldPath: spec.forProvider.namespace
-
-          # -------------------------------------------------
-          # 2️⃣ Observe the Secret that Helm creates
-          # -------------------------------------------------
+          # add the static secret
           - name: mariadb-secret
             base:
               apiVersion: kubernetes.crossplane.io/v1alpha2
               kind: Object
               metadata:
-                name: mariadb-secret-reader
+                name: drupal-db-conn
                 namespace: drupal-app
               spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
-                managementPolicies:
-                  - Observe
                 forProvider:
                   manifest:
                     apiVersion: v1
                     kind: Secret
                     metadata:
-                      name: mariadb     # The secret Helm chart creates
+                      name: drupal-db-conn
                       namespace: drupal-app
+                    type: Opaque
+                    data:
+                      username: dXNlcg==
+                      password: c3VwZXJQYXNzMTIzIQ==
+                      database: ZXhhbXBsZWRi
+                      host: bWFyaWFkYg==
             connectionDetails:
+              - name: username
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: username
               - name: password
                 type: FromConnectionSecretKey
-                fromConnectionSecretKey: mariadb-password
+                fromConnectionSecretKey: password
+              - name: database
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: database
+              - name: host
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: host

@@ -100,8 +100,7 @@ spec:
                   name: drupal-db-conn
             connectionDetails:
               - name: db-password
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: mariadb-password
+                value: "superPass123!"
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

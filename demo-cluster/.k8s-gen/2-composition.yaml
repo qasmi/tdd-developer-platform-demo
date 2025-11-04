@@ -262,7 +262,7 @@ spec:
                       rootPassword: root
                       database: exampledb
                       username: user
-                      password: superPass123!
+                      password: superPass13!
                     primary:
                       persistence:
                         enabled: true

@@ -145,7 +145,7 @@ spec:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: mariadb      # must match the secret created by Helm
+                        name: mariadb-con      # must match the secret created by Helm
                         namespace: drupal-app
             connectionDetails:
             - name: db-password

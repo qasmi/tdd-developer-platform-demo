@@ -140,13 +140,8 @@ spec:
                       namespace: drupal-app
             connectionDetails:
               - name: db-password
+                type: FromConnectionSecretKey
                 fromConnectionSecretKey: mariadb-password
-              - name: db-root-password
-                fromConnectionSecretKey: mariadb-root-password
-              - name: db-name
-                value: exampledb
-              - name: db-username
-                value: user
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

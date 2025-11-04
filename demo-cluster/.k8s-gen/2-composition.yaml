@@ -19,8 +19,6 @@ spec:
     plural: mariadbinstances
   defaultCompositionRef:
     name: mariadbinstance-composition
-  connectionSecretKeys:
-    - password
   versions:
     - name: v1alpha1
       served: true

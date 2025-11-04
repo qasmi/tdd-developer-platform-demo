@@ -105,10 +105,10 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
-            connectionDetails:
-              - name: db-password
-                type: FromFieldPath
-                fromFieldPath: spec.forProvider.values.auth.password
+            #connectionDetails:
+            #  - name: db-password
+            #    type: FromFieldPath
+            #    fromFieldPath: spec.forProvider.values.auth.password
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

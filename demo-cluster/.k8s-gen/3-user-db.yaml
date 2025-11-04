@@ -4,9 +4,6 @@ metadata:
   name: drupal-db
   namespace: drupal-app
 spec:
-  writeConnectionSecretToRef:
-    name: drupal-db-conn
-    namespace: drupal-app
   parameters:
     database: "drupal"
     username: "drupal"

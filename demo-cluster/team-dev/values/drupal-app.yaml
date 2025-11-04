@@ -9,7 +9,7 @@ externalDatabase:
   port: 3306
   database: drupal
   user: drupal
-  existingSecret: "mariadb"
+  existingSecret: "drupal-db-conn"
 
 mariadb:
   enabled: false

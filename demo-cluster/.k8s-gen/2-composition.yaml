@@ -98,8 +98,8 @@ spec:
                         size: 1Gi
             connectionDetails:
               - name: db-password
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: mariadb-password
+                type: FromFieldPath
+                fromFieldPath: spec.forProvider.values.auth.password
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

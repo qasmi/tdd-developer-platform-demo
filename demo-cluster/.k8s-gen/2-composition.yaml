@@ -60,9 +60,17 @@ kind: Composition
 metadata:
   name: mariadbinstance-composition
 spec:
+  # This defines the composite type it implements
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
+
+  # Tells Crossplane where to publish the aggregated connection secret
+  writeConnectionSecretToRef:
+    name: drupal-db-conn
+    namespace: drupal-app
+
+  # Use Function pipeline mode
   mode: Pipeline
   pipeline:
     - step: deploy-mariadb
@@ -73,7 +81,7 @@ spec:
         kind: Resources
         resources:
           # ---------------------
-          # 1️⃣ Deploy MariaDB via Helm
+          # 1️⃣ Helm Release — deploy MariaDB
           # ---------------------
           - name: mariadb
             base:
@@ -104,6 +112,10 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
+              writeConnectionSecretToRef:
+                name: mariadb
+                namespace: drupal-app
+
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database
@@ -118,7 +130,7 @@ spec:
                 toFieldPath: spec.forProvider.namespace
 
           # ---------------------
-          # 2️⃣ Fetch the actual secret created by the Bitnami chart
+          # 2️⃣ Observe the secret Helm creates and extract connection details
           # ---------------------
           - name: mariadb-secret
             base:
@@ -131,19 +143,28 @@ spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
                 managementPolicies:
-                  - Observe
+                  - Observe  # Important: only observe, don’t create/delete
                 forProvider:
                   manifestFrom:
                     resource:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: mariadb
+                        name: mariadb      # must match the secret created by Helm
                         namespace: drupal-app
             connectionDetails:
-                - name: db-password
-                  type: FromValue
-                  value: "superPass123!"
+              - name: db-password
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: mariadb-password
+              - name: db-root-password
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: mariadb-root-password
+              - name: db-username
+                type: FromValue
+                value: user
+              - name: db-database
+                type: FromValue
+                value: exampledb
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

@@ -74,9 +74,6 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-helm
-                writeConnectionSecretToRef:
-                  name: mariadb
-                  namespace: "drupal-app"
                 forProvider:
                   namespace: "drupal-app"
                   chart:
@@ -96,6 +93,9 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
+                writeConnectionSecretToRef:
+                  name: drupal-db-conn
+                  namespace: "drupal-app"
             connectionDetails:
               - name: db-password
                 type: FromValue

@@ -97,9 +97,9 @@ spec:
                   namespace: drupal-app
                   name: drupal-db-conn
             connectionDetails:
-              - name: my-status-secret
-                type: FromValue
-                value: "docs.crossplane.io"
+              - name: db-password
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: mariadb-password
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

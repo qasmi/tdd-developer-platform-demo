@@ -140,10 +140,10 @@ spec:
                       metadata:
                         name: mariadb
                         namespace: drupal-app
-              connectionDetails:
-                  - name: db-password
-                    type: FromValue
-                    value: "superPass123!"
+            connectionDetails:
+                - name: db-password
+                  type: FromValue
+                  value: "superPass123!"
 
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

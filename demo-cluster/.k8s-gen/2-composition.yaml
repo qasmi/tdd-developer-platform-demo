@@ -108,7 +108,7 @@ spec:
                         enabled: true
                         size: 1Gi
                 writeConnectionSecretToRef:
-                  name: mariadb
+                  name: drupal-db-conn
                   namespace: drupal-app
 
             patches:
@@ -145,7 +145,7 @@ spec:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: mariadb-con      # must match the secret created by Helm
+                        name: drupal-db-conn     # must match the secret created by Helm
                         namespace: drupal-app
             connectionDetails:
             - name: db-password

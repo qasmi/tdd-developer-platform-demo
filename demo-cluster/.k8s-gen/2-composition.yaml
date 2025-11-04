@@ -107,10 +107,6 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
-                writeConnectionSecretToRef:
-                  name: drupal-db-conn
-                  namespace: drupal-app
-
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database
@@ -145,7 +141,7 @@ spec:
                       apiVersion: v1
                       kind: Secret
                       metadata:
-                        name: drupal-db-conn     # must match the secret created by Helm
+                        name: mariadb     # must match the secret created by Helm
                         namespace: drupal-app
             connectionDetails:
             - name: db-password

@@ -141,14 +141,6 @@ spec:
                   name: mariadb
                   namespace: drupal-app
       connectionDetails:
-        - name: db-password
-          type: FromConnectionSecretKey
-          fromConnectionSecretKey: mariadb-password
-        - name: db-root-password
-          type: FromConnectionSecretKey
-          fromConnectionSecretKey: mariadb-root-password
-
-            connectionDetails:
             - name: db-password
               type: FromValue
               value: "superPass123!"

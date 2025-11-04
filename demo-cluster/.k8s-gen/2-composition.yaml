@@ -96,11 +96,10 @@ spec:
                 writeConnectionSecretToRef:
                   namespace: drupal-app
                   name: drupal-db-conn
-            connectionDetails:
-              - name: db-password
-                type: FromValue
-                value: "docs.crossplane.io"
-
+                connectionDetails:
+                  - name: db-password
+                    type: FromValue
+                    value: "docs.crossplane.io"
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database

@@ -55,8 +55,6 @@ spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
-  writeConnectionSecretToRef:
-    name: drupal-db-conn
   mode: Pipeline
   pipeline:
     - step: deploy-mariadb
@@ -76,6 +74,8 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-helm
+                writeConnectionSecretToRef:
+                  name: drupal-db-conn
                 forProvider:
                   namespace: "drupal-app"
                   chart:
@@ -96,10 +96,6 @@ spec:
                         enabled: true
                         size: 1Gi
             connectionDetails:
-              #- name: db-password
-              #  type: FromFieldPath
-              #  fromFieldPath: spec.forProvider.values.auth.password
-              #  connectionDetails:
               - name: db-password
                 type: FromConnectionSecretKey
                 fromConnectionSecretKey: mariadb-password

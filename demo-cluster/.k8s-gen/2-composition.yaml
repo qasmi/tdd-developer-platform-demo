@@ -39,8 +39,6 @@ spec:
                       type: string
                     username:
                       type: string
-                    password:
-                      type: string
 ---
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
@@ -108,11 +106,6 @@ spec:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.username
                 toFieldPath: spec.forProvider.values.auth.username
-                policy:
-                  fromFieldPath: Optional
-              - type: FromCompositeFieldPath
-                fromFieldPath: spec.parameters.password
-                toFieldPath: spec.forProvider.values.auth.password
                 policy:
                   fromFieldPath: Optional
               - type: FromCompositeFieldPath

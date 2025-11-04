@@ -63,9 +63,6 @@ spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
-  writeConnectionSecretToRef:
-    name: drupal-db-conn
-    namespace: drupal-app
   mode: Pipeline
   pipeline:
     - step: deploy-mariadb

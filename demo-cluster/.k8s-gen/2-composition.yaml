@@ -145,6 +145,79 @@ spec:
 #                        dataFrom:
 #                          db-password: "superPass123!"
 
+#apiVersion: apiextensions.crossplane.io/v1
+#kind: Composition
+#metadata:
+#  name: mariadbinstance-composition
+#spec:
+#  compositeTypeRef:
+#    apiVersion: database.kubecon.io/v1alpha1
+#    kind: MariaDBInstance
+#  mode: Pipeline
+#  pipeline:
+#    - step: deploy-mariadb
+#      functionRef:
+#        name: function-patch-and-transform
+#      input:
+#        apiVersion: pt.fn.crossplane.io/v1beta1
+#        kind: Resources
+#        resources:
+#          - name: mariadb
+#            base:
+#              apiVersion: helm.crossplane.io/v1beta1
+#              kind: Release
+#              metadata:
+#                namespace: crossplane
+#                name: mariadb
+#              spec:
+#                providerConfigRef:
+#                  name: in-cluster-helm
+#                forProvider:
+#                  namespace: "drupal-app"
+#                  chart:
+#                    repository: https://charts.bitnami.com/bitnami
+#                    name: mariadb
+#                    version: 22.0.0
+#                  values:
+#                    image:
+#                      repository: bitnamilegacy/mariadb
+#                      tag: "12.0.2-debian-12-r0"
+#                    auth:
+#                      rootPassword: root
+#                      database: exampledb
+#                      username: user
+#                      password: superPass123! # TODO generate random pwd
+#                    primary:
+#                      persistence:
+#                        enabled: true
+#                        size: 1Gi
+#                writeConnectionSecretToRef:
+#                  namespace: drupal-app
+#                  name: drupal-db-conn
+#            connectionDetails:
+#              - name: db-password
+#                type: FromValue
+#                value: "superPass123!"
+#            patches:
+#              - type: FromCompositeFieldPath
+#                fromFieldPath: spec.parameters.database
+#                toFieldPath: spec.forProvider.values.auth.database
+#                policy:
+#                  fromFieldPath: Optional
+#              - type: FromCompositeFieldPath
+#                fromFieldPath: spec.parameters.username
+#                toFieldPath: spec.forProvider.values.auth.username
+#                policy:
+#                  fromFieldPath: Optional
+#              - type: FromCompositeFieldPath
+#                fromFieldPath: spec.parameters.size
+#                toFieldPath: spec.forProvider.values.primary.persistence.size
+#                policy:
+#                  fromFieldPath: Optional
+#              - fromFieldPath: metadata.namespace
+#                toFieldPath: spec.forProvider.namespace
+#
+
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
@@ -153,6 +226,12 @@ spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
     kind: MariaDBInstance
+
+  # This is where Crossplane writes the aggregated connection Secret
+  writeConnectionSecretToRef:
+    name: drupal-db-conn
+    namespace: drupal-app
+
   mode: Pipeline
   pipeline:
     - step: deploy-mariadb
@@ -162,6 +241,9 @@ spec:
         apiVersion: pt.fn.crossplane.io/v1beta1
         kind: Resources
         resources:
+          # -------------------------------------------------
+          # 1️⃣ Deploy MariaDB via Helm
+          # -------------------------------------------------
           - name: mariadb
             base:
               apiVersion: helm.crossplane.io/v1beta1
@@ -173,7 +255,7 @@ spec:
                 providerConfigRef:
                   name: in-cluster-helm
                 forProvider:
-                  namespace: "drupal-app"
+                  namespace: drupal-app
                   chart:
                     repository: https://charts.bitnami.com/bitnami
                     name: mariadb
@@ -186,33 +268,48 @@ spec:
                       rootPassword: root
                       database: exampledb
                       username: user
-                      password: superPass123! # TODO generate random pwd
+                      password: superPass123!
                     primary:
                       persistence:
                         enabled: true
                         size: 1Gi
-                writeConnectionSecretToRef:
-                  namespace: drupal-app
-                  name: drupal-db-conn
-            connectionDetails:
-              - name: db-password
-                type: FromValue
-                value: "superPass123!"
+
             patches:
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.database
                 toFieldPath: spec.forProvider.values.auth.database
-                policy:
-                  fromFieldPath: Optional
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.username
                 toFieldPath: spec.forProvider.values.auth.username
-                policy:
-                  fromFieldPath: Optional
               - type: FromCompositeFieldPath
                 fromFieldPath: spec.parameters.size
                 toFieldPath: spec.forProvider.values.primary.persistence.size
-                policy:
-                  fromFieldPath: Optional
               - fromFieldPath: metadata.namespace
                 toFieldPath: spec.forProvider.namespace
+
+          # -------------------------------------------------
+          # 2️⃣ Observe the Secret that Helm creates
+          # -------------------------------------------------
+          - name: mariadb-secret
+            base:
+              apiVersion: kubernetes.crossplane.io/v1alpha2
+              kind: Object
+              metadata:
+                name: mariadb-secret-reader
+                namespace: drupal-app
+              spec:
+                providerConfigRef:
+                  name: in-cluster-kubernetes
+                managementPolicies:
+                  - Observe
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: Secret
+                    metadata:
+                      name: mariadb     # The secret Helm chart creates
+                      namespace: drupal-app
+            connectionDetails:
+              - name: password
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: mariadb-password

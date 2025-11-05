@@ -30,14 +30,14 @@ roleRef:
   kind: ClusterRole
   name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
-#---
-#apiVersion: helm.m.crossplane.io/v1beta1
-#kind: ClusterProviderConfig
-#metadata:
-#  name: in-cluster-helm
-#spec:
-#  credentials:
-#    source: InjectedIdentity
+---
+apiVersion: helm.m.crossplane.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+name: in-cluster-helm
+spec:
+credentials:
+  source: InjectedIdentity
 #---
 #apiVersion: kubernetes.crossplane.io/v1alpha1
 #kind: ProviderConfig
@@ -46,44 +46,44 @@ roleRef:
 #spec:
 #  credentials:
 #    source: InjectedIdentity
-#---
-#apiVersion: apiextensions.crossplane.io/v1
-#kind: CompositeResourceDefinition
-#metadata:
-#  name: mariadbinstances.database.kubecon.io
-#spec:
-#  scope: Namespaced
-#  group: database.kubecon.io
-#  names:
-#    kind: MariaDBInstance
-#    plural: mariadbinstances
-#  versions:
-#    - name: v1alpha1
-#      served: true
-#      referenceable: true
-#      schema:
-#        openAPIV3Schema:
-#          type: object
-#          properties:
-#            spec:
-#              type: object
-#              properties:
-#                parameters:
-#                  type: object
-#                  properties:
-#                    size:
-#                      type: string
-#                    database:
-#                      type: string
-#                    username:
-#                      type: string
-#---
-#apiVersion: pkg.crossplane.io/v1
-#kind: Function
-#metadata:
-#  name: function-patch-and-transform
-#spec:
-#  package: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.9.1
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+ name: mariadbinstances.database.kubecon.io
+spec:
+ scope: Namespaced
+ group: database.kubecon.io
+ names:
+   kind: MariaDBInstance
+   plural: mariadbinstances
+ versions:
+   - name: v1alpha1
+     served: true
+     referenceable: true
+     schema:
+       openAPIV3Schema:
+         type: object
+         properties:
+           spec:
+             type: object
+             properties:
+               parameters:
+                 type: object
+                 properties:
+                   size:
+                     type: string
+                   database:
+                     type: string
+                   username:
+                     type: string
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+ name: function-patch-and-transform
+spec:
+ package: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.9.1
 #---
 #apiVersion: apiextensions.crossplane.io/v1
 #kind: Composition

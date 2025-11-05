@@ -1,5 +1,4 @@
 provider:
   packages: 
-    #- "xpkg.upbound.io/crossplane-contrib/provider-helm:v1.0.2"
     - "xpkg.upbound.io/crossplane-contrib/provider-kubernetes:v1.0.0"
   defaultActivations: ["*"]

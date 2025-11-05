@@ -25,7 +25,7 @@ metadata:
 subjects:
   - kind: ServiceAccount
     name: provider-helm
-    namespace: crossplane-system
+    namespace: crossplane
 roleRef:
   kind: ClusterRole
   name: cluster-admin

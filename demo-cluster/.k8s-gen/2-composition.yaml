@@ -20,13 +20,13 @@ kind: CompositeResourceDefinition
 metadata:
   name: mariadbinstances.database.kubecon.io
 spec:
-  scope: Cluster
+  scope: Namespaced
   group: database.kubecon.io
   names:
     kind: MariaDBInstance
     plural: mariadbinstances
-  defaultCompositionRef:
-    name: mariadbinstance-composition
+  #defaultCompositionRef:
+  #  name: mariadbinstance-composition
   versions:
     - name: v1alpha1
       served: true
@@ -83,7 +83,7 @@ spec:
                 providerConfigRef:
                   name: in-cluster-helm
                 forProvider:
-                  namespace: drupal-app
+                  namespace: default
                   chart:
                     repository: https://charts.bitnami.com/bitnami
                     name: mariadb

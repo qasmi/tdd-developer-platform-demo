@@ -57,7 +57,7 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: mariadbinstance-composition
-  namespace: mariadb
+  namespace: drupal-app
 spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1
@@ -100,8 +100,6 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
-
-          # add the static secret
           - name: mariadb-secret
             base:
               apiVersion: kubernetes.crossplane.io/v1alpha2

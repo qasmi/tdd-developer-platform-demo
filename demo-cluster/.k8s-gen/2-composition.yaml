@@ -57,6 +57,7 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: mariadbinstance-composition
+  namespace: mariadb
 spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1

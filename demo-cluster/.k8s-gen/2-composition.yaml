@@ -20,7 +20,7 @@ kind: CompositeResourceDefinition
 metadata:
   name: mariadbinstances.database.kubecon.io
 spec:
-  scope: Cluster # Namespaced
+  scope: Namespaced
   group: database.kubecon.io
   names:
     kind: MariaDBInstance

@@ -90,13 +90,29 @@ spec:
                       tag: "12.0.2-debian-12-r0"
                     auth:
                       rootPassword: root
-                      database: drupal
-                      username: drupal
-                      password: superPass123!
+                      database: exampledb
+                      username: user
+                      password: superPass123! # TODO generate random pwd
                     primary:
                       persistence:
                         enabled: true
                         size: 1Gi
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.database
+                toFieldPath: spec.forProvider.values.auth.database
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.username
+                toFieldPath: spec.forProvider.values.auth.username
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.size
+                toFieldPath: spec.forProvider.values.primary.persistence.size
+                policy:
+                  fromFieldPath: Optional
           - name: mariadb-secret
             base:
               apiVersion: v1

@@ -4,12 +4,16 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: crossplane
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 ---
 # Source: gitops-chart/templates/namespace.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: drupal-app
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 ---
 # Source: gitops-chart/templates/project.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -17,6 +21,8 @@ kind: AppProject
 metadata:
   name: dev
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   description: Project dev
   destinations:
@@ -33,6 +39,8 @@ kind: AppProject
 metadata:
   name: platform
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   description: Project platform
   destinations:
@@ -61,9 +69,10 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  annotations: {}
   name: dev-apps
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   goTemplate: true
   generators:
@@ -147,9 +156,10 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  annotations: {}
   name: platform-apps
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   goTemplate: true
   generators:

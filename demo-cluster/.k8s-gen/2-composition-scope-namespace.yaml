@@ -130,28 +130,26 @@ spec:
                       persistence:
                         enabled: true
                         size: 1Gi
-#          - name: mariadb-secret
-#            base:
-#              apiVersion: kubernetes.crossplane.io/v1alpha2
-#              kind: Object
-#              metadata:
-#                name: drupal-db-conn
-#                namespace: drupal-app
-#              spec:
-#                providerConfigRef:
-#                  name: in-cluster-kubernetes
-#                forProvider:
-#                  manifest:
-#                    apiVersion: v1
-#                    kind: Secret
-#                    metadata:
-#                      name: drupal-db-conn
-#                      namespace: drupal-app
-#                    type: Opaque
-#                    data:
-#                      db-password: c3VwZXJQYXNzMTIzIQ==
-#            connectionDetails:
-#              - name: db-password
-#                type: FromConnectionSecretKey
-#                fromConnectionSecretKey: password
-#
+          - name: mariadb-secret
+            base:
+              apiVersion: kubernetes.m.crossplane.io/v1alpha2
+              kind: Object
+              metadata:
+                name: drupal-db-conn
+              spec:
+                providerConfigRef:
+                  name: in-cluster-kubernetes
+                forProvider:
+                  manifest:
+                    apiVersion: v1
+                    kind: Secret
+                    metadata:
+                      name: drupal-db-conn
+                      namespace: drupal-app
+                    type: Opaque
+                    data:
+                      db-password: c3VwZXJQYXNzMTIzIQ==
+            connectionDetails:
+              - name: db-password
+                type: FromConnectionSecretKey
+                fromConnectionSecretKey: password

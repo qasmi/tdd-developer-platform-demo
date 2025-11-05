@@ -50,33 +50,33 @@ spec:
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
- name: mariadbinstances.database.kubecon.io
+  name: mariadbinstances.database.kubecon.io
 spec:
- scope: Namespaced
- group: database.kubecon.io
- names:
-   kind: MariaDBInstance
-   plural: mariadbinstances
- versions:
-   - name: v1alpha1
-     served: true
-     referenceable: true
-     schema:
-       openAPIV3Schema:
-         type: object
-         properties:
-           spec:
-             type: object
-             properties:
-               parameters:
-                 type: object
-                 properties:
-                   size:
-                     type: string
-                   database:
-                     type: string
-                   username:
-                     type: string
+  scope: Namespaced
+  group: database.kubecon.io
+  names:
+    kind: MariaDBInstance
+    plural: mariadbinstances
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  properties:
+                    size:
+                      type: string
+                    database:
+                      type: string
+                    username:
+                      type: string
 ---
 apiVersion: pkg.crossplane.io/v1
 kind: Function
@@ -88,46 +88,48 @@ spec:
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
- name: mariadbinstance-composition
+  name: mariadbinstance-composition
 spec:
- compositeTypeRef:
-   apiVersion: database.kubecon.io/v1alpha1
-   kind: MariaDBInstance
- mode: Pipeline
- pipeline:
-   - step: deploy-mariadb
-     functionRef:
-       name: function-patch-and-transform
-     input:
-       apiVersion: pt.fn.crossplane.io/v1beta1
-       kind: Resources
-       resources:
-         - name: mariadb
-           base:
-             apiVersion: helm.m.crossplane.io/v1beta1
-             kind: Release
-             spec:
-               providerConfigRef:
-                 name: in-cluster-helm
-                 kind: ClusterProviderConfig
-               forProvider:
-                 chart:
-                   repository: https://charts.bitnami.com/bitnami
-                   name: mariadb
-                   version: 22.0.0
-                 values:
-                   image:
-                     repository: bitnamilegacy/mariadb
-                     tag: "12.0.2-debian-12-r0"
-                   auth:
-                     rootPassword: root
-                     database: exampledb
-                     username: user
-                     password: superPass123!
-                   primary:
-                     persistence:
-                       enabled: true
-                       size: 1Gi
+  compositeTypeRef:
+    apiVersion: database.kubecon.io/v1alpha1
+    kind: MariaDBInstance
+  mode: Pipeline
+  pipeline:
+    - step: deploy-mariadb
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: mariadb
+            base:
+              apiVersion: helm.m.crossplane.io/v1beta1
+              kind: Release
+              metadata:
+                name: drupal-db
+              spec:
+                providerConfigRef:
+                  name: in-cluster-helm
+                  kind: ClusterProviderConfig
+                forProvider:
+                  chart:
+                    repository: https://charts.bitnami.com/bitnami
+                    name: mariadb
+                    version: 22.0.0
+                  values:
+                    image:
+                      repository: bitnamilegacy/mariadb
+                      tag: "12.0.2-debian-12-r0"
+                    auth:
+                      rootPassword: root
+                      database: exampledb
+                      username: user
+                      password: superPass123!
+                    primary:
+                      persistence:
+                        enabled: true
+                        size: 1Gi
 #          - name: mariadb-secret
 #            base:
 #              apiVersion: kubernetes.crossplane.io/v1alpha2

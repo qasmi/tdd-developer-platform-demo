@@ -106,9 +106,6 @@ spec:
            base:
              apiVersion: helm.m.crossplane.io/v1beta1
              kind: Release
-             metadata:
-               namespace: crossplane
-               name: mariadb
              spec:
                providerConfigRef:
                  name: in-cluster-helm

@@ -2,7 +2,7 @@ apiVersion: database.kubecon.io/v1alpha1
 kind: MariaDBInstance
 metadata:
   name: drupal-db
-  namespace: drupal-app
+  #namespace: drupal-app
 spec:
   parameters:
     database: "drupal"

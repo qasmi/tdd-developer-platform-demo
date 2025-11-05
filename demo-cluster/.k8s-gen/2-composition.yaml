@@ -20,7 +20,7 @@ kind: CompositeResourceDefinition
 metadata:
   name: mariadbinstances.database.kubecon.io
 spec:
-  scope: Namespaced
+  scope: Cluster # Namespaced
   group: database.kubecon.io
   names:
     kind: MariaDBInstance
@@ -57,7 +57,6 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
   name: mariadbinstance-composition
-  namespace: drupal-app
 spec:
   compositeTypeRef:
     apiVersion: database.kubecon.io/v1alpha1

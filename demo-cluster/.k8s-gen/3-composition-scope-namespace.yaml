@@ -111,13 +111,6 @@ spec:
                   manifest:
                     apiVersion: v1
                     kind: Secret
-                    metadata:
-                      name: drupal-db-conn
-                      namespace: drupal-app
                     type: Opaque
                     data:
                       db-password: c3VwZXJQYXNzMTIzIQ==
-            connectionDetails:
-              - name: db-password
-                type: FromConnectionSecretKey
-                fromConnectionSecretKey: password

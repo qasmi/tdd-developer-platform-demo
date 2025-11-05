@@ -99,18 +99,8 @@ spec:
                         size: 1Gi
           - name: mariadb-secret
             base:
-              apiVersion: kubernetes.m.crossplane.io/v1alpha1
-              kind: Object
-              metadata:
-                name: drupal-db-conn
-              spec:
-                providerConfigRef:
-                  name: in-cluster-kubernetes
-                  kind: ClusterProviderConfig
-                forProvider:
-                  manifest:
-                    apiVersion: v1
-                    kind: Secret
-                    type: Opaque
-                    data:
-                      db-password: c3VwZXJQYXNzMTIzIQ==
+              apiVersion: v1
+              kind: Secret
+              type: Opaque
+              data:
+                db-password: c3VwZXJQYXNzMTIzIQ==

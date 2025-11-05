@@ -34,10 +34,10 @@ roleRef:
 apiVersion: helm.m.crossplane.io/v1beta1
 kind: ClusterProviderConfig
 metadata:
-name: in-cluster-helm
+  name: in-cluster-helm
 spec:
-credentials:
-  source: InjectedIdentity
+  credentials:
+    source: InjectedIdentity
 #---
 #apiVersion: kubernetes.crossplane.io/v1alpha1
 #kind: ProviderConfig

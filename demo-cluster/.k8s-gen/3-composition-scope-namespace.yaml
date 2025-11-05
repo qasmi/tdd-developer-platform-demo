@@ -5,14 +5,14 @@ metadata:
 spec:
   credentials:
     source: InjectedIdentity
-#---
-#apiVersion: kubernetes.crossplane.io/v1alpha1
-#kind: ProviderConfig
-#metadata:
-#  name: in-cluster-kubernetes
-#spec:
-#  credentials:
-#    source: InjectedIdentity
+---
+apiVersion: kubernetes.m.crossplane.io/v1alpha1
+kind: ClusterProviderConfig
+metadata:
+ name: in-cluster-kubernetes
+spec:
+ credentials:
+   source: InjectedIdentity
 ---
 apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
@@ -106,6 +106,7 @@ spec:
               spec:
                 providerConfigRef:
                   name: in-cluster-kubernetes
+                  kind: ClusterProviderConfig
                 forProvider:
                   manifest:
                     apiVersion: v1

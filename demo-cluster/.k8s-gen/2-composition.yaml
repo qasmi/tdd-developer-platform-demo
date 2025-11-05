@@ -25,8 +25,6 @@ spec:
   names:
     kind: MariaDBInstance
     plural: mariadbinstances
-  #defaultCompositionRef:
-  #  name: mariadbinstance-composition
   versions:
     - name: v1alpha1
       served: true

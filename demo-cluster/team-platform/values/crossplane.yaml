@@ -1,4 +1,2 @@
 provider:
-  packages: 
-    - "xpkg.upbound.io/crossplane-contrib/provider-kubernetes:v1.0.0"
   defaultActivations: ["*"]

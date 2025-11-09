@@ -71,7 +71,7 @@ spec:
                 toFieldPath: spec.forProvider.values.primary.persistence.size
                 policy:
                   fromFieldPath: Optional
-          - name: drupal-db-conn
+          - name: mariadb-secret
             base:
               apiVersion: v1
               kind: Secret
@@ -79,4 +79,4 @@ spec:
                 name: drupal-db-conn
               type: Opaque
               data:
-                db-password: c3VwZXJQYXNzMTIzIQ==
+                password: c3VwZXJQYXNzMTIzIQ==

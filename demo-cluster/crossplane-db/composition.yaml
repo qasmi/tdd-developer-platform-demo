@@ -1,0 +1,85 @@
+apiVersion: helm.m.crossplane.io/v1beta1
+kind: ClusterProviderConfig
+metadata:
+  name: in-cluster-helm
+spec:
+  credentials:
+    source: InjectedIdentity
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-patch-and-transform
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.9.1
+---
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: mariadbinstance-composition
+spec:
+  compositeTypeRef:
+    apiVersion: database.kubecon.io/v1alpha1
+    kind: MariaDBInstance
+  mode: Pipeline
+  pipeline:
+    - step: deploy-mariadb
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: mariadb
+            base:
+              apiVersion: helm.m.crossplane.io/v1beta1
+              kind: Release
+              metadata:
+                name: mariadb
+              spec:
+                providerConfigRef:
+                  name: in-cluster-helm
+                  kind: ClusterProviderConfig
+                forProvider:
+                  chart:
+                    repository: https://charts.bitnami.com/bitnami
+                    name: mariadb
+                    version: 22.0.0
+                  values:
+                    image:
+                      repository: bitnamilegacy/mariadb
+                      tag: "12.0.2-debian-12-r0"
+                    auth:
+                      rootPassword: root
+                      database: exampledb
+                      username: user
+                      password: superPass123!
+                    primary:
+                      persistence:
+                        enabled: true
+                        size: 1Gi
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.database
+                toFieldPath: spec.forProvider.values.auth.database
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.username
+                toFieldPath: spec.forProvider.values.auth.username
+                policy:
+                  fromFieldPath: Optional
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.parameters.size
+                toFieldPath: spec.forProvider.values.primary.persistence.size
+                policy:
+                  fromFieldPath: Optional
+#          - name: mariadb-secret
+#            base:
+#              apiVersion: v1
+#              kind: Secret
+#              metadata:
+#                name: drupal-db-conn
+#              type: Opaque
+#              data:
+#                db-password: c3VwZXJQYXNzMTIzIQ==

@@ -9,9 +9,16 @@ spec:
   project: dev
   revisionHistoryLimit: 5
   source:
-    repoURL: https://charts.bitnami.com/bitnami
-    chart: drupal
-    targetRevision: "23.0.0"
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: drupal
+      targetRevision: "23.0.0"
+      helm:
+        valueFiles:
+        - $values/values.yaml
+    - repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
+      path: ./demo-cluster/dev/drupal
+      targetRevision: HEAD
+      ref: values
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: dev

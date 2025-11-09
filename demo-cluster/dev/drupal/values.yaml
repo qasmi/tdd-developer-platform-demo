@@ -17,4 +17,3 @@ mariadb:
 
 service:
   type: ClusterIP
-  loadBalancerIP: "172.18.250.1"

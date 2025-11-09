@@ -9,7 +9,7 @@ spec:
   project: dev
   revisionHistoryLimit: 5
   source:
-    repo: https://charts.bitnami.com/bitnami
+    repoURL: https://charts.bitnami.com/bitnami
     chart: drupal
     targetRevision: "23.0.0"
   destination:

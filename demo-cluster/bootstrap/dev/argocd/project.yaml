@@ -10,6 +10,8 @@ spec:
   destinations:
     - server: https://kubernetes.default.svc
       namespace: dev
+    - server: https://kubernetes.default.svc
+      namespace: argocd
   sourceRepos:
     - https://github.com/qasmi/tdd-developer-platform-demo.git
     - https://charts.bitnami.com/bitnami

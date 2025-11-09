@@ -13,4 +13,6 @@ spec:
   sourceRepos:
     - https://github.com/qasmi/tdd-developer-platform-demo.git
     - https://charts.bitnami.com/bitnami
-  clusterResourceWhitelist: []
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'

@@ -36,6 +36,8 @@ spec:
     repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
     path: ./demo-cluster/dev/
     targetRevision: HEAD
+    directory:
+      recurse: true
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: dev

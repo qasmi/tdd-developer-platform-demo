@@ -77,9 +77,9 @@ spec:
               apiVersion: v1
               kind: Secret
               metadata:
-                name: drupal-db-conn
+                name: drupal-db
               type: Opaque
               data:
-                password: c3VwZXJQYXNzMTIzIQ==
+                db-password: c3VwZXJQYXNzMTIzIQ==
             readinessChecks:
               - type: None

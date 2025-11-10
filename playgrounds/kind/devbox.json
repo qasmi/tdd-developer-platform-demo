@@ -26,7 +26,8 @@
         "helm repo add argo https://argoproj.github.io/argo-helm",
         "helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --namespace argocd --create-namespace --values addons/argocd.yaml --wait --timeout 15m --atomic",
         "kubectl apply -f addons/gitops-repo.yaml",
-        "kubectl apply -f ../../demo-cluster/.bootstrap/app-of-apps.yaml"
+        "kubectl apply -f ../../demo-cluster/apps/projects.yaml",
+        "kubectl apply -f ../../demo-cluster/apps/boostrap.yaml"
       ],
       "shutdown": [
         "kind delete cluster"

@@ -3,6 +3,10 @@ name: Test-Driven Development Applied to Developer Platforms
 on:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tdd-platform:
     runs-on: ubuntu-latest
@@ -81,6 +85,9 @@ jobs:
         run: |
           kubectl apply -f demo-cluster/apps/projects.yaml
           kubectl apply -f demo-cluster/apps/bootstrap.yaml
-      - name: Run tests
+      - name: Run platform tests
         run: |
           chainsaw test demo-cluster/test/platform
+      - name: Run app tests
+        run: |
+          chainsaw test demo-cluster/test/dev

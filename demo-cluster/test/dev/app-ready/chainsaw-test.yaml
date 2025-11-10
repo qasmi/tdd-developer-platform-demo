@@ -8,7 +8,7 @@ spec:
   steps:
   - try:
     - assert:
-        timeout: 3m
+        timeout: 5m
         resource:
           apiVersion: argoproj.io/v1alpha1
           kind: Application

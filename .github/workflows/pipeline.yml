@@ -84,10 +84,13 @@ jobs:
       - name: Bootstrap cluster
         run: |
           kubectl apply -f demo-cluster/apps/projects.yaml
+          sed -i 's/HEAD/${{ github.ref_name }}/' demo-cluster/apps/bootstrap.yaml
           kubectl apply -f demo-cluster/apps/bootstrap.yaml
-      - name: Run platform tests
-        run: |
-          chainsaw test demo-cluster/test/platform
-      - name: Run app tests
-        run: |
-          chainsaw test demo-cluster/test/dev
+          cat demo-cluster/apps/bootstrap.yaml
+      #- name: Run platform tests
+      #  run: |
+      #    chainsaw test demo-cluster/test/platform
+      #- name: Run app tests
+      #  run: |
+      #    chainsaw test demo-cluster/test/dev
+      

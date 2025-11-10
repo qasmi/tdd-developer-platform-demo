@@ -21,29 +21,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-# ---
-# apiVersion: argoproj.io/v1alpha1
-# kind: Application
-# metadata:
-#   name: dev-app
-#   namespace: argocd
-#   finalizers:
-#     - resources-finalizer.argocd.argoproj.io
-# spec:
-#   project: dev
-#   revisionHistoryLimit: 5
-#   source:
-#     repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
-#     path: ./demo-cluster/dev/
-#     targetRevision: HEAD
-#     directory:
-#       recurse: true
-#   destination:
-#     server: 'https://kubernetes.default.svc'
-#     namespace: dev
-#   syncPolicy:
-#     automated:
-#       prune: true
-#       selfHeal: true
-#     syncOptions:
-#       - CreateNamespace=true

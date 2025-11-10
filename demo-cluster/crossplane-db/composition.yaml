@@ -85,10 +85,9 @@ spec:
               kind: Secret
               metadata:
                 name: drupal-db-conn
+                annotations:
+                  pt.fn.crossplane.io/ready: "True"
               type: Opaque
               data:
                 db-password: c3VwZXJQYXNzMTIzCg==
                 # db-password: c3VwZXJQYXNzMTIzIQ==
-    - step: automatically-detect-ready-composed-resources
-      functionRef:
-        name: function-auto-ready

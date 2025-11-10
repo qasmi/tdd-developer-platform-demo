@@ -7,45 +7,6 @@ spec:
   concurrent: false
   steps:
   - try:
-    - assert:
-        timeout: 3m
-        resource:
-          apiVersion: argoproj.io/v1alpha1
-          kind: Application
-          metadata:
-            name: crossplane
-            namespace: argocd
-          status:
-            health:
-              status: Healthy
-            sync:
-              status: Synced
-    - assert:
-        timeout: 3m
-        resource:
-          apiVersion: argoproj.io/v1alpha1
-          kind: Application
-          metadata:
-            name: crossplane-helm
-            namespace: argocd
-          status:
-            health:
-              status: Healthy
-            sync:
-              status: Synced
-    - assert:
-        timeout: 3m
-        resource:
-          apiVersion: argoproj.io/v1alpha1
-          kind: Application
-          metadata:
-            name: crossplane-db
-            namespace: argocd
-          status:
-            health:
-              status: Healthy
-            sync:
-              status: Synced
     - create:
         resource:
           apiVersion: database.kubecon.io/v1alpha1

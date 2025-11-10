@@ -30,61 +30,10 @@ jobs:
           cluster_name: kind
       - name: Install helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
-      - name: Install argocd
+      - name: Install crossplane
         run: |
-          helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm \
-            --namespace argocd --create-namespace \
-            --wait \
-            --timeout 15m \
-            --atomic \
-            --values - <<EOF
-          global:
-            logging:
-              format: json
-
-          configs:
-            rbac:
-              create: true
-              scopes: '[email,groups]'
-              policy.default: role:readonly
-              policy.csv: |
-                p, role:readonly, applications, get, */*, allow
-                p, role:admin, applications, *, */*, allow
-
-          applicationSet:
-            replicas: 1
-                
-          controller:
-            extraArgs:
-              - --app-resync=20
-            replicas: 1
-            enableStatefulSet: true
-            logFormat: json
-
-          redis-ha:
-            enabled: false
-            
-          repoServer:
-            logFormat: json
-            logLevel: "warn"
-
-          server:
-            extraArgs:
-              - --insecure
-            service:
-              type: ClusterIP
-            logFormat: json
-                
-          dex:
-            enabled: false
-
-          notifications:
-            enabled: false
-          EOF
-      - name: Bootstrap cluster
-        run: |
-          kubectl apply -f demo-cluster/apps/projects.yaml
-          kubectl apply -f demo-cluster/apps/bootstrap.yaml
+          set -e
+          make all
       - name: Run platform tests
         run: |
           chainsaw test demo-cluster/test/platform

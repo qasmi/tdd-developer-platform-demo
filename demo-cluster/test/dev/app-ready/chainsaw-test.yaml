@@ -7,16 +7,35 @@ spec:
   concurrent: false
   steps:
   - try:
-    - assert:
-        timeout: 5m
+    - create:
         resource:
-          apiVersion: argoproj.io/v1alpha1
-          kind: Application
+          apiVersion: database.kubecon.io/v1alpha1
+          kind: MariaDBInstance
           metadata:
-            name: app-dev
-            namespace: argocd
+            name: drupal-db
+          spec:
+            parameters:
+              database: "drupal"
+              username: "drupal"
+              size: "4Gi"
+    - assert:
+        timeout: 2m
+        resource:
+          apiVersion: database.kubecon.io/v1alpha1
+          kind: MariaDBInstance
+          metadata:
+            name: drupal-db
           status:
-            health:
-              status: Healthy
-            sync:
-              status: Synced
+            (conditions[?type == 'Ready']):
+            - status: 'True'
+    - script:
+        timeout: 3m
+        content: |
+          helm install app-dev \
+            --namespace $NAMESPACE \
+            --wait \
+            --timeout 15m \
+            --atomic \
+            oci://registry-1.docker.io/bitnamicharts/drupal \
+            --version 23.0.0 \
+            --values ../../../../demo-cluster/manifests/dev/drupal-values.yaml

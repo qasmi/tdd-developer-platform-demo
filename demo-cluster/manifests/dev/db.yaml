@@ -6,4 +6,4 @@ spec:
   parameters:
     database: "drupal"
     username: "drupal"
-    size: "4Gi"
+    size: "8Gi"

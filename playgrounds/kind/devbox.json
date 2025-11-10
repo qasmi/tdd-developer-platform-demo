@@ -18,7 +18,7 @@
         "kind create cluster --image kindest/node:v1.34.0 --wait 1m --config config/kind.yaml",
         "helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --namespace argocd --create-namespace --values addons/argocd.yaml --wait --timeout 15m --atomic",
         "kubectl apply -f ../../demo-cluster/apps/projects.yaml",
-        "kubectl apply -f ../../demo-cluster/apps/boostrap.yaml",
+        "kubectl apply -f ../../demo-cluster/apps/bootstrap.yaml",
         "kubectl port-forward service/argocd-server -n argocd 8080:443"
       ],
       "shutdown": [

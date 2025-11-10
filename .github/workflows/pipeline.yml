@@ -13,41 +13,74 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Generate Manifests
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git fetch origin ${{ github.head_ref }} 
-          git checkout -B ${{ github.head_ref }} origin/${{ github.head_ref }}
-
-          cd demo-cluster
-          make || exit 1
-          cd ..
-
-          git add ./demo-cluster/.k8s-gen/
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: auto-update manifests [ci skip]"
-            git push origin ${{ github.head_ref }} -o ci.skip
-          else
-            echo "No changes to commit."
-          fi
-
-      - name: Install Chainsaw
-        uses: kyverno/action-install-chainsaw@v0.1.0
+      - name: Install cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      - name: Install chainsaw
+        uses: kyverno/action-install-chainsaw@6354895e0f99ab23d3e38d85cf5c71b5dc21d727 # v0.2.13
         with:
-          release: v0.0.9
-
-      - name: Setup kubeconfig
+          verify: true
+      - name: Create kind cluster
+        uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
+        with:
+          node_image: kindest/node:v1.34.0
+          cluster_name: kind
+      - name: Install helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+      - name: Install argocd
         run: |
-          mkdir -p ~/.kube
-          printf "%s" "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
+          helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm \
+            --namespace argocd --create-namespace \
+            --wait \
+            --timeout 15m \
+            --atomic \
+            --values - <<EOF
+          global:
+            logging:
+              format: json
 
-      - name: Run Tests
+          configs:
+            rbac:
+              create: true
+              scopes: '[email,groups]'
+              policy.default: role:readonly
+              policy.csv: |
+                p, role:readonly, applications, get, */*, allow
+                p, role:admin, applications, *, */*, allow
+
+          applicationSet:
+            replicas: 1
+                
+          controller:
+            extraArgs:
+              - --app-resync=20
+            replicas: 1
+            enableStatefulSet: true
+            logFormat: json
+
+          redis-ha:
+            enabled: false
+            
+          repoServer:
+            logFormat: json
+            logLevel: "warn"
+
+          server:
+            extraArgs:
+              - --insecure
+            service:
+              type: ClusterIP
+            logFormat: json
+                
+          dex:
+            enabled: false
+
+          notifications:
+            enabled: false
+          EOF
+      - name: Bootstrap cluster
         run: |
-          kubectl cluster-info
-          #cd ./demo-cluster/test
-          #chainsaw test
+          kubectl apply -f demo-cluster/apps/projects.yaml
+          kubectl apply -f demo-cluster/apps/bootstrap.yaml
+      - name: Run tests
+        run: |
+          chainsaw test demo-cluster/test/platform

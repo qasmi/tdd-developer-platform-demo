@@ -3,6 +3,8 @@ kind: Application
 metadata:
   name: crossplane-db
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-97"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:

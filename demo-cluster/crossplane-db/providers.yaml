@@ -3,6 +3,8 @@ kind: Provider
 metadata:
   name: provider-helm
   annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookFailed
     argocd.argoproj.io/sync-wave: "-1"
 spec:
   package: xpkg.crossplane.io/crossplane-contrib/provider-helm:v1.0.0
@@ -16,6 +18,8 @@ kind: DeploymentRuntimeConfig
 metadata:
   name: provider-helm
   annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookFailed
     argocd.argoproj.io/sync-wave: "-2"
 spec:
   serviceAccountTemplate:

@@ -1,0 +1,9 @@
+apiVersion: database.kubecon.io/v1alpha1
+kind: MariaDBInstance
+metadata:
+  name: drupal-db
+spec:
+  parameters:
+    database: "drupal"
+    username: "drupal"
+    size: "4Gi"

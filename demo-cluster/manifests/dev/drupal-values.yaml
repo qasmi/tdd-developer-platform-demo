@@ -6,7 +6,7 @@ drupalUsername: admin
 drupalPassword: superPass123!
 
 externalDatabase:
-  host: mariadb.dev.svc.cluster.local
+  host: mariadb
   port: 3306
   database: drupal
   user: drupal

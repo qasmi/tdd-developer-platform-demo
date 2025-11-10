@@ -40,14 +40,6 @@ jobs:
         with:
           release: v0.0.9
 
-      - name: Setup kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          printf "%s" "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
-          chmod 600 ~/.kube/config
-
       - name: Run Tests
         run: |
-          kubectl cluster-info
-          #cd ./demo-cluster/test
-          #chainsaw test
+          chainsaw test

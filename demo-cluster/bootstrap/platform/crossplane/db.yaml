@@ -10,7 +10,7 @@ spec:
   revisionHistoryLimit: 5
   source:
     repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
-    path: ./demo-cluster/crossplane-db/
+    path: ./demo-cluster/platform/crossplane-db/
     targetRevision: HEAD
   destination:
     server: 'https://kubernetes.default.svc'

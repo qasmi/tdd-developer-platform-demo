@@ -16,7 +16,7 @@ kind: DeploymentRuntimeConfig
 metadata:
   name: provider-helm
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "-2"
 spec:
   serviceAccountTemplate:
     metadata:

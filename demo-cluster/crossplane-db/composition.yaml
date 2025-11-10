@@ -13,6 +13,13 @@ metadata:
 spec:
   package: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.9.1
 ---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-auto-ready
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-auto-ready:v0.5.1
+---
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
@@ -80,5 +87,8 @@ spec:
                 name: drupal-db-conn
               type: Opaque
               data:
-                # db-password: c3VwZXJQYXNzMTIzCg==
-                db-password: c3VwZXJQYXNzMTIzIQ==
+                db-password: c3VwZXJQYXNzMTIzCg==
+                # db-password: c3VwZXJQYXNzMTIzIQ==
+    - step: automatically-detect-ready-composed-resources
+      functionRef:
+        name: function-auto-ready

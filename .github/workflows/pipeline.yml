@@ -83,7 +83,7 @@ jobs:
       #    EOF
       - name: Bootstrap cluster
         run: |
-          kubectl apply -f demo-cluster/apps/projects.yaml
+         # kubectl apply -f demo-cluster/apps/projects.yaml
           sed -i "s/HEAD/${{ github.ref_name }}/" demo-cluster/apps/bootstrap.yaml
           kubectl apply -f demo-cluster/apps/bootstrap.yaml
           cat demo-cluster/apps/bootstrap.yaml

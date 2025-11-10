@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/kyverno/chainsaw/main/.schemas/json/test-chainsaw-v1alpha1.json
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: mariadb
+spec:
+  steps:
+  - try:
+    - create:
+        resource:
+          apiVersion: database.kubecon.io/v1alpha1
+          kind: MariaDBInstance
+          metadata:
+            name: drupal-db
+          spec:
+            parameters:
+              database: "drupal"
+              username: "drupal"
+              size: "4Gi"
+    - assert:
+        timeout: 2m
+        resource:
+          apiVersion: database.kubecon.io/v1alpha1
+          kind: MariaDBInstance
+          metadata:
+            name: drupal-db
+          status:
+            (conditions[?type == 'Ready']):
+            - status: 'True'
+    - assert:
+        resource:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: drupal-db-conn
+          type: Opaque
+          data:
+            (length(@ | "db-password") > `0`): true

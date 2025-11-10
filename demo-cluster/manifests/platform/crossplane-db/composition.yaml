@@ -80,7 +80,9 @@ spec:
                 name: drupal-db-conn
               type: Opaque
               data:
-                db-password: c3VwZXJQYXNzMTIzCg==
-                # db-password: c3VwZXJQYXNzMTIzIQ==
+                # good one
+                db-password: c3VwZXJQYXNzMTIzIQ==
+                # bad one
+                # db-password: c3VwZXJQYXNzMTIzCg==
             readinessChecks:
               - type: None

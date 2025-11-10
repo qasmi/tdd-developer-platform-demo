@@ -12,15 +12,15 @@ spec:
     - repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
       targetRevision: HEAD
       path: demo-cluster/manifests/dev/
-    # - repoURL: https://charts.bitnami.com/bitnami
-    #   chart: drupal
-    #   targetRevision: "23.0.0"
-    #   helm:
-    #     valueFiles:
-    #     - $values/demo-cluster/dev/drupal/values.yaml
-    # - repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
-    #   targetRevision: HEAD
-    #   ref: values
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: drupal
+      targetRevision: "23.0.0"
+      helm:
+        valueFiles:
+        - $values/demo-cluster/manifests/dev/drupal-values.yaml
+    - repoURL: https://github.com/qasmi/tdd-developer-platform-demo.git
+      targetRevision: HEAD
+      ref: values
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: dev

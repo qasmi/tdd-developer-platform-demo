@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: dev
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  description: Project dev
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: dev
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  sourceRepos:
+    - https://github.com/qasmi/tdd-developer-platform-demo.git
+    - https://charts.bitnami.com/bitnami
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-100"
+spec:
+  description: Project platform
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: crossplane
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+  sourceRepos:
+    - https://github.com/qasmi/tdd-developer-platform-demo.git
+    - https://charts.crossplane.io/stable
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'

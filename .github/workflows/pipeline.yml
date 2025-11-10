@@ -17,70 +17,70 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install cosign
-        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
-      - name: Install chainsaw
-        uses: kyverno/action-install-chainsaw@6354895e0f99ab23d3e38d85cf5c71b5dc21d727 # v0.2.13
-        with:
-          verify: true
-      - name: Create kind cluster
-        uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
-        with:
-          node_image: kindest/node:v1.34.0
-          cluster_name: kind
-      - name: Install helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
-      - name: Install argocd
-        run: |
-          helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm \
-            --namespace argocd --create-namespace \
-            --wait \
-            --timeout 15m \
-            --atomic \
-            --values - <<EOF
-          global:
-            logging:
-              format: json
-
-          configs:
-            rbac:
-              create: true
-              scopes: '[email,groups]'
-              policy.default: role:readonly
-              policy.csv: |
-                p, role:readonly, applications, get, */*, allow
-                p, role:admin, applications, *, */*, allow
-
-          applicationSet:
-            replicas: 1
-                
-          controller:
-            extraArgs:
-              - --app-resync=20
-            replicas: 1
-            enableStatefulSet: true
-            logFormat: json
-
-          redis-ha:
-            enabled: false
-            
-          repoServer:
-            logFormat: json
-            logLevel: "warn"
-
-          server:
-            extraArgs:
-              - --insecure
-            service:
-              type: ClusterIP
-            logFormat: json
-                
-          dex:
-            enabled: false
-
-          notifications:
-            enabled: false
-          EOF
+      #- name: Install cosign
+      #  uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      #- name: Install chainsaw
+      #  uses: kyverno/action-install-chainsaw@6354895e0f99ab23d3e38d85cf5c71b5dc21d727 # v0.2.13
+      #  with:
+      #    verify: true
+      #- name: Create kind cluster
+      #  uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
+      #  with:
+      #    node_image: kindest/node:v1.34.0
+      #    cluster_name: kind
+      #- name: Install helm
+      #  uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+      #- name: Install argocd
+      #  run: |
+      #    helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm \
+      #      --namespace argocd --create-namespace \
+      #      --wait \
+      #      --timeout 15m \
+      #      --atomic \
+      #      --values - <<EOF
+      #    global:
+      #      logging:
+      #        format: json
+#
+      #    configs:
+      #      rbac:
+      #        create: true
+      #        scopes: '[email,groups]'
+      #        policy.default: role:readonly
+      #        policy.csv: |
+      #          p, role:readonly, applications, get, */*, allow
+      #          p, role:admin, applications, *, */*, allow
+#
+      #    applicationSet:
+      #      replicas: 1
+      #          
+      #    controller:
+      #      extraArgs:
+      #        - --app-resync=20
+      #      replicas: 1
+      #      enableStatefulSet: true
+      #      logFormat: json
+#
+      #    redis-ha:
+      #      enabled: false
+      #      
+      #    repoServer:
+      #      logFormat: json
+      #      logLevel: "warn"
+#
+      #    server:
+      #      extraArgs:
+      #        - --insecure
+      #      service:
+      #        type: ClusterIP
+      #      logFormat: json
+      #          
+      #    dex:
+      #      enabled: false
+#
+      #    notifications:
+      #      enabled: false
+      #    EOF
       - name: Bootstrap cluster
         run: |
           kubectl apply -f demo-cluster/apps/projects.yaml

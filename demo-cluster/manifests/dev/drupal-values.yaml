@@ -2,7 +2,7 @@ image:
   repository: bitnamilegacy/drupal
   tag: 11.2.3-debian-12-r2
 
-replicaCount: 3
+replicaCount: 1
 
 drupalUsername: admin
 drupalPassword: superPass123!

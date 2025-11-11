@@ -33,7 +33,7 @@ jobs:
       - name: Install crossplane
         run: |
           set -e
-          make all
+          make install-platform
       - name: Run platform tests
         run: |
           chainsaw test demo-cluster/test/platform

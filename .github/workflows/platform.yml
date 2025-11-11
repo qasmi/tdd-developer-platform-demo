@@ -1,4 +1,4 @@
-name: Test-Driven Development Applied to Developer Platforms
+name: Platform tests
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tdd-platform:
+  platform-tests:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -37,6 +37,3 @@ jobs:
       - name: Run platform tests
         run: |
           chainsaw test demo-cluster/test/platform
-      - name: Run app tests
-        run: |
-          chainsaw test demo-cluster/test/dev

@@ -1,0 +1,39 @@
+name: App tests
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  app-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    environment: demo   
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install cosign
+        uses: sigstore/cosign-installer@faadad0cce49287aee09b3a48701e75088a2c6ad # v4.0.0
+      - name: Install chainsaw
+        uses: kyverno/action-install-chainsaw@6354895e0f99ab23d3e38d85cf5c71b5dc21d727 # v0.2.13
+        with:
+          verify: true
+      - name: Create kind cluster
+        uses: helm/kind-action@92086f6be054225fa813e0a4b13787fc9088faab # v1.13.0
+        with:
+          node_image: kindest/node:v1.34.0
+          cluster_name: kind
+      - name: Install helm
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+      - name: Install crossplane
+        run: |
+          set -e
+          make install-platform
+      - name: Run app tests
+        run: |
+          chainsaw test demo-cluster/test/dev

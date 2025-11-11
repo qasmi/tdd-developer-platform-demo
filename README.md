@@ -44,3 +44,8 @@ This command sets up the Kubernetes cluster, installs ArgoCD, and bootstraps the
 cd playgrounds/kind
 devbox run shutdown
 ```
+
+```bash
+kubectl apply -f ../../demo-cluster/apps/projects.yaml
+kubectl apply -f ../../demo-cluster/apps/bootstrap.yaml
+```

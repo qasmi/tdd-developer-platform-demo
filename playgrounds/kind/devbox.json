@@ -3,7 +3,6 @@
   "packages": [
     "kind@0.29.0",
     "kubernetes-helm@3.14.4",
-    "cilium-cli@0.18.5",
     "curl@8.7.1",
     "glow@1.5.1",
     "docker@24.0.5",
@@ -17,8 +16,6 @@
       "setup": [
         "kind create cluster --image kindest/node:v1.34.0 --wait 1m --config config/kind.yaml",
         "helm upgrade --install argocd argo-cd --repo https://argoproj.github.io/argo-helm --namespace argocd --create-namespace --values addons/argocd.yaml --wait --timeout 15m --atomic",
-        "kubectl apply -f ../../demo-cluster/apps/projects.yaml",
-        "kubectl apply -f ../../demo-cluster/apps/bootstrap.yaml",
         "kubectl port-forward service/argocd-server -n argocd 8080:443"
       ],
       "shutdown": [
